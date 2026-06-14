@@ -1,0 +1,66 @@
+/* Globale Grundformatierung fuer die gesamte Anwendung */
+* {
+  box-sizing: border-box;
+}
+
+:root {
+  --red: #e30613;
+  --red-dark: #a8000b;
+  --blue: #315fd9;
+  --teal: #0f9f8f;
+  --gold: #f0a202;
+  --ink: #161719;
+  --muted: #4b5563;
+  --soft-muted: #6b7280;
+  --bg: #f4f7fb;
+  --surface: #ffffff;
+  --surface-soft: #f9fbfd;
+  --line: #dce3eb;
+  --shadow: 0 18px 44px rgba(31, 42, 55, 0.11);
+  --shadow-soft: 0 12px 30px rgba(31, 42, 55, 0.07);
+}
+
+/* Ruhiges Scrollverhalten fuer die Navigation innerhalb der Seite */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Entfernt das Standard-Layout von Vite und setzt das BOice-Grunddesign */
+html,
+body {
+  width: 100%;
+  overflow-x: hidden;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+  background: #f6f8fb;
+  color: var(--ink);
+  font-family: Arial, sans-serif;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Formularelemente uebernehmen die gleiche Schrift wie die App */
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+/* Buttons sollen sich direkt klickbar anfuehlen */
+button {
+  cursor: pointer;
+}
+
+#app {
+  width: 100%;
+  overflow-x: hidden;
+}
+
+::selection {
+  background: rgba(227, 6, 19, 0.18);
+}
