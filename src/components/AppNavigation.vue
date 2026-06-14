@@ -2,52 +2,88 @@
   <!-- Feste Sidebar wie im Referenzdesign -->
   <aside class="sidebar">
     <RouterLink class="brand" to="/" aria-label="BOice Startseite">
-      <span class="brand-mark">B</span>
-      <span>
-        <strong>BOice</strong>
-        <small>Your voice at Hochschule Bochum</small>
-      </span>
+      <img src="/boice-logo.png" alt="BOice" />
     </RouterLink>
 
     <nav class="side-links" aria-label="Hauptnavigation">
       <RouterLink to="/">
-        <span aria-hidden="true">⌂</span>
+        <span class="nav-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24">
+            <path d="M4 11.5 12 5l8 6.5" />
+            <path d="M6.5 10.5V20h11v-9.5" />
+            <path d="M10 20v-5h4v5" />
+          </svg>
+        </span>
         Startseite
       </RouterLink>
-      <RouterLink to="/beitraege">
-        <span aria-hidden="true">+</span>
-        Neue Beiträge
+      <RouterLink v-if="isLoggedIn" to="/meine-beitraege">
+        <span class="nav-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24">
+            <path d="M7 4h10l2 2v14H5V4h2Z" />
+            <path d="M9 10h6" />
+            <path d="M9 14h6" />
+            <path d="M9 18h4" />
+          </svg>
+        </span>
+        Meine Beiträge
       </RouterLink>
-      <RouterLink to="/profil">
-        <span aria-hidden="true">@</span>
-        Eingeloggt
+      <RouterLink v-if="isLoggedIn" to="/benachrichtigungen">
+        <span class="nav-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24">
+            <path d="M18 10a6 6 0 0 0-12 0c0 5-2 6-2 6h16s-2-1-2-6Z" />
+            <path d="M10 19a2 2 0 0 0 4 0" />
+          </svg>
+        </span>
+        Benachrichtigungen
       </RouterLink>
     </nav>
 
     <section class="side-categories" aria-label="Kategorien">
       <div class="side-section-head">
         <span>Kategorien</span>
-        <strong>Alle</strong>
+        <RouterLink :class="{ active: currentCategory === 'Alle' }" :to="{ path: '/beitraege' }">
+          Alle
+        </RouterLink>
       </div>
-      <p><i class="dot module"></i>Module</p>
-      <p><i class="dot rooms"></i>Räume</p>
-      <p><i class="dot campus"></i>Campus</p>
+
+      <RouterLink
+        :class="{ active: currentCategory === 'Module' }"
+        :to="{ path: '/beitraege', query: { category: 'Module' } }"
+      >
+        <i class="dot module"></i>
+        Module
+      </RouterLink>
+      <RouterLink
+        :class="{ active: currentCategory === 'Räume' }"
+        :to="{ path: '/beitraege', query: { category: 'Räume' } }"
+      >
+        <i class="dot rooms"></i>
+        Räume
+      </RouterLink>
+      <RouterLink
+        :class="{ active: currentCategory === 'Campus' }"
+        :to="{ path: '/beitraege', query: { category: 'Campus' } }"
+      >
+        <i class="dot campus"></i>
+        Campus
+      </RouterLink>
     </section>
 
     <div class="sidebar-bottom">
-      <span class="online-state"><i></i> Online</span>
-
       <div v-if="isLoggedIn" class="side-account" aria-label="Angemeldeter Account">
-        <span>{{ accountInitials }}</span>
-        <div>
-          <strong>{{ accountName }}</strong>
-          <button type="button" @click="logout">Abmelden</button>
+        <div class="account-card">
+          <span>{{ accountInitials }}</span>
+          <div>
+            <small>Angemeldet als</small>
+            <strong>{{ accountName }}</strong>
+          </div>
         </div>
+        <button class="logout-button" type="button" @click="logout">Abmelden</button>
       </div>
 
       <div v-else class="side-auth" aria-label="Kontoaktionen">
-        <RouterLink to="/anmelden">Anmelden</RouterLink>
-        <RouterLink to="/registrieren">Registrieren</RouterLink>
+        <RouterLink class="auth-primary" to="/anmelden">Anmelden</RouterLink>
+        <RouterLink class="auth-secondary" to="/registrieren">Registrieren</RouterLink>
       </div>
     </div>
   </aside>
@@ -55,7 +91,7 @@
 
 <script setup lang="ts">
 import { computed, onMounted, onUnmounted, ref } from 'vue'
-import { RouterLink } from 'vue-router'
+import { RouterLink, useRoute } from 'vue-router'
 
 type Account = {
   name?: string
@@ -63,6 +99,7 @@ type Account = {
 
 const accountStorageKey = 'boice:account'
 const loginStorageKey = 'boice:isLoggedIn'
+const route = useRoute()
 
 const isLoggedIn = ref(false)
 const fallbackAccountName = 'Test'
@@ -92,6 +129,11 @@ const accountInitials = computed(() => {
     .join('')
     .slice(0, 2)
     .toUpperCase() || 'BO'
+})
+
+const currentCategory = computed(() => {
+  const category = Array.isArray(route.query.category) ? route.query.category[0] : route.query.category
+  return typeof category === 'string' ? category : 'Alle'
 })
 
 const logout = () => {
@@ -125,15 +167,18 @@ onUnmounted(() => {
 }
 
 .brand {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  color: var(--ink);
+  display: block;
   text-decoration: none;
 }
 
-.brand-mark,
-.side-account > span {
+.brand img {
+  display: block;
+  width: min(170px, 100%);
+  height: auto;
+  object-fit: contain;
+}
+
+.account-card > span {
   width: 42px;
   height: 42px;
   border-radius: 8px;
@@ -145,21 +190,10 @@ onUnmounted(() => {
   font-weight: 900;
 }
 
-.brand strong,
 .side-account strong {
   display: block;
   font-size: 20px;
   line-height: 1;
-}
-
-.brand small {
-  display: block;
-  max-width: 128px;
-  margin-top: 4px;
-  color: var(--muted);
-  font-size: 11px;
-  font-weight: 800;
-  line-height: 1.25;
 }
 
 .side-links {
@@ -169,6 +203,7 @@ onUnmounted(() => {
 }
 
 .side-links a {
+  min-width: 0;
   min-height: 42px;
   border-radius: 8px;
   color: var(--ink);
@@ -177,10 +212,14 @@ onUnmounted(() => {
   gap: 10px;
   padding: 0 10px;
   text-decoration: none;
+  font-size: 14px;
   font-weight: 900;
+  line-height: 1.2;
+  overflow-wrap: anywhere;
 }
 
-.side-links a span {
+.side-links .nav-icon {
+  flex: 0 0 auto;
   width: 24px;
   height: 24px;
   border: 1px solid var(--line);
@@ -189,12 +228,28 @@ onUnmounted(() => {
   display: grid;
   place-items: center;
   color: var(--muted);
-  font-size: 13px;
+}
+
+.side-links .nav-icon svg {
+  width: 16px;
+  height: 16px;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 2;
 }
 
 .side-links a:hover,
 .side-links a.router-link-active {
   background: #eef3ff;
+  color: var(--blue);
+}
+
+.side-links a:hover .nav-icon,
+.side-links a.router-link-active .nav-icon {
+  border-color: rgba(49, 95, 217, 0.24);
+  background: white;
   color: var(--blue);
 }
 
@@ -214,17 +269,28 @@ onUnmounted(() => {
   text-transform: uppercase;
 }
 
-.side-section-head strong {
+.side-section-head a {
   color: var(--red);
+  text-decoration: none;
 }
 
-.side-categories p {
+.side-section-head a:hover {
+  color: var(--red-dark);
+}
+
+.side-categories > a {
+  min-height: 28px;
   display: flex;
   align-items: center;
   gap: 10px;
-  margin: 0;
   color: var(--ink);
   font-weight: 900;
+  text-decoration: none;
+}
+
+.side-categories > a:hover,
+.side-categories > a.active {
+  color: var(--blue);
 }
 
 .dot {
@@ -253,79 +319,122 @@ onUnmounted(() => {
   margin-top: auto;
 }
 
-.online-state {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  color: var(--muted);
-  font-size: 13px;
-  font-weight: 900;
-}
-
-.online-state i {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  background: var(--gold);
-}
-
 .side-account,
 .side-auth {
+  display: grid;
+  gap: 9px;
+}
+
+.account-card {
+  min-width: 0;
   border: 1px solid var(--line);
   border-radius: 8px;
   background: white;
-  padding: 9px;
-}
-
-.side-account {
   display: flex;
   align-items: center;
   gap: 10px;
+  padding: 10px;
 }
 
-.side-account > span {
+.account-card > span {
+  flex: 0 0 auto;
   width: 32px;
   height: 32px;
   background: var(--red);
   font-size: 13px;
 }
 
+.account-card div {
+  min-width: 0;
+}
+
+.account-card small {
+  display: block;
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
 .side-account strong {
-  max-width: 110px;
+  display: block;
+  max-width: 130px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
   font-size: 15px;
+  line-height: 1.15;
 }
 
-.side-account button {
-  border: 0;
-  background: transparent;
+.logout-button {
+  width: 100%;
+  min-height: 38px;
+  border: 1px solid #f6c9cd;
+  border-radius: 8px;
+  background: #fff0f1;
   color: var(--red);
-  padding: 0;
-  font-size: 12px;
+  padding: 0 12px;
+  font-size: 13px;
   font-weight: 900;
+  text-align: left;
 }
 
-.side-auth {
-  display: grid;
-  gap: 6px;
+.logout-button:hover {
+  background: var(--red);
+  color: white;
 }
 
 .side-auth a {
-  min-height: 36px;
-  border-radius: 7px;
+  min-height: 42px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: white;
   color: var(--ink);
   display: flex;
   align-items: center;
-  padding: 0 10px;
+  cursor: pointer;
+  padding: 0 12px;
   text-decoration: none;
   font-weight: 900;
+  box-shadow: 0 6px 12px rgba(31, 42, 55, 0.05);
+  transition:
+    background 160ms ease,
+    border-color 160ms ease,
+    box-shadow 160ms ease,
+    color 160ms ease,
+    transform 160ms ease;
 }
 
-.side-auth a:first-child {
+.side-auth a:hover {
+  border-color: rgba(227, 6, 19, 0.28);
+  box-shadow: 0 10px 18px rgba(227, 6, 19, 0.12);
+  transform: translateY(-1px);
+}
+
+.side-auth a.router-link-active {
+  border-color: rgba(227, 6, 19, 0.35);
+  box-shadow: 0 8px 16px rgba(227, 6, 19, 0.12);
+}
+
+.side-auth .auth-primary {
   background: var(--red);
+  border-color: var(--red);
   color: white;
+}
+
+.side-auth .auth-primary:hover,
+.side-auth .auth-primary.router-link-active {
+  background: var(--red-dark);
+  border-color: var(--red-dark);
+}
+
+.side-auth .auth-secondary {
+  color: var(--red);
+}
+
+.side-auth .auth-secondary:hover,
+.side-auth .auth-secondary.router-link-active {
+  background: #fff0f1;
 }
 
 @media (max-width: 900px) {

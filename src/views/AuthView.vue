@@ -34,12 +34,12 @@
           <p class="label">{{ isRegisterMode ? 'Registrieren' : 'Anmelden' }}</p>
           <h2>{{ formTitle }}</h2>
         </div>
-        <span>Frontend</span>
       </div>
 
-      <p v-if="!isRegisterMode" class="login-hint">
-        Test-Login: student@hs-bochum.de mit Passwort boice1234
-      </p>
+      <nav class="auth-mode-switch" aria-label="Kontoaktion wählen">
+        <RouterLink to="/anmelden" :class="{ active: !isRegisterMode }">Anmelden</RouterLink>
+        <RouterLink to="/registrieren" :class="{ active: isRegisterMode }">Registrieren</RouterLink>
+      </nav>
 
       <label v-if="isRegisterMode">
         Vollständiger Name
@@ -122,10 +122,10 @@
         {{ isRegisterMode ? 'Konto erstellen' : 'Anmelden' }}
       </button>
 
-      <p class="switch-link">
+      <div class="switch-link">
         <span>{{ switchText }}</span>
         <RouterLink :to="switchTarget">{{ switchLinkText }}</RouterLink>
-      </p>
+      </div>
     </form>
   </section>
 </template>
@@ -155,8 +155,8 @@ const form = reactive({
   name: '',
   studyProgram: 'Wirtschaftsinformatik',
   semester: 3,
-  email: '',
-  password: '',
+  email: 'student@hs-bochum.de',
+  password: 'boice1234',
   passwordRepeat: '',
   acceptRules: false,
 })
@@ -378,23 +378,46 @@ const submitForm = () => {
   font-size: 25px;
 }
 
-.form-head > span {
-  border-radius: 999px;
-  background: #e6f7f4;
-  color: #08776c;
-  padding: 6px 10px;
-  font-size: 13px;
-  font-weight: 900;
+.auth-mode-switch {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface-soft);
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px;
+  margin-bottom: 16px;
+  padding: 6px;
 }
 
-.login-hint {
-  border: 1px solid #b7e4dc;
-  border-radius: 8px;
-  background: #e6f7f4;
-  color: #08776c;
-  margin: 0 0 16px;
-  padding: 10px 12px;
-  font-weight: 800;
+.auth-mode-switch a {
+  min-height: 42px;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  background: white;
+  color: var(--muted);
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  text-decoration: none;
+  font-weight: 900;
+  transition:
+    background 160ms ease,
+    border-color 160ms ease,
+    color 160ms ease,
+    transform 160ms ease;
+}
+
+.auth-mode-switch a:hover {
+  border-color: rgba(227, 6, 19, 0.25);
+  background: #fff0f1;
+  color: var(--red);
+  transform: translateY(-1px);
+}
+
+.auth-mode-switch a.active {
+  background: var(--red);
+  color: white;
+  box-shadow: 0 10px 18px rgba(227, 6, 19, 0.18);
 }
 
 .field-grid {
@@ -491,32 +514,61 @@ select:focus {
   border-radius: 8px;
   background: var(--red);
   color: white;
+  cursor: pointer;
   font-weight: 900;
   box-shadow: 0 10px 20px rgba(231, 53, 53, 0.2);
+  transition:
+    background 160ms ease,
+    transform 160ms ease,
+    box-shadow 160ms ease;
 }
 
 .submit-button:hover {
   background: var(--red-dark);
+  box-shadow: 0 14px 24px rgba(231, 53, 53, 0.24);
+  transform: translateY(-1px);
 }
 
 .switch-link {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface-soft);
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: space-between;
   flex-wrap: wrap;
-  gap: 8px;
-  margin: 16px 0 0;
+  gap: 10px;
+  margin: 18px 0 0;
+  padding: 10px;
   color: var(--muted);
   font-weight: 800;
 }
 
 .switch-link a {
+  min-height: 36px;
+  border: 1px solid #f6c9cd;
+  border-radius: 8px;
+  background: white;
   color: var(--red);
+  display: inline-flex;
+  align-items: center;
+  cursor: pointer;
+  padding: 0 12px;
   text-decoration: none;
+  font-weight: 900;
+  box-shadow: 0 8px 16px rgba(227, 6, 19, 0.08);
+  transition:
+    background 160ms ease,
+    border-color 160ms ease,
+    color 160ms ease,
+    transform 160ms ease;
 }
 
 .switch-link a:hover {
+  border-color: rgba(227, 6, 19, 0.3);
+  background: #fff0f1;
   color: var(--red-dark);
+  transform: translateY(-1px);
 }
 
 @media (max-width: 980px) {

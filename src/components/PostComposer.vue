@@ -1,6 +1,6 @@
 <template>
   <!-- Formular zum Erstellen eines neuen Beitrags -->
-  <form class="composer" @submit.prevent="submitPost">
+  <form class="composer" :class="{ locked: !props.isLoggedIn }" @submit.prevent="submitPost">
     <div class="composer-head">
       <span class="composer-avatar">BO</span>
       <div>
@@ -9,15 +9,29 @@
       </div>
     </div>
 
+    <div v-if="!props.isLoggedIn" class="login-required" role="alert">
+      <div>
+        <strong>Anmeldung erforderlich</strong>
+        <p>Du kannst erst einen Beitrag erstellen, wenn du angemeldet bist.</p>
+      </div>
+      <RouterLink to="/anmelden">Anmelden</RouterLink>
+    </div>
+
     <label>
       <span class="sr-only">Titel</span>
-      <input v-model="form.title" type="text" placeholder="Kurzer Titel, z. B. Java Übungen" />
+      <input
+        v-model="form.title"
+        :disabled="!props.isLoggedIn"
+        type="text"
+        placeholder="Kurzer Titel, z. B. Java Übungen"
+      />
     </label>
 
     <label>
       <span class="sr-only">Beitrag</span>
       <textarea
         v-model="form.body"
+        :disabled="!props.isLoggedIn"
         rows="4"
         placeholder="Was ist passiert? Was sollte besser werden?"
       ></textarea>
@@ -29,6 +43,7 @@
         :key="category"
         type="button"
         :class="{ active: form.category === category }"
+        :disabled="!props.isLoggedIn"
         @click="form.category = category"
       >
         {{ category }}
@@ -49,6 +64,7 @@
           :class="{ active: star <= visibleRating }"
           :aria-checked="form.rating === star"
           :aria-label="`${star} von 5 Sternen`"
+          :disabled="!props.isLoggedIn"
           role="radio"
           @click="form.rating = star"
           @mouseenter="hoverRating = star"
@@ -61,12 +77,12 @@
 
     <div class="composer-actions">
       <label class="switch-row">
-        <input v-model="form.isAnonymous" type="checkbox" />
+        <input v-model="form.isAnonymous" :disabled="!props.isLoggedIn" type="checkbox" />
         <span aria-hidden="true"></span>
         Anonym posten
       </label>
 
-      <button type="submit">Post erstellen</button>
+      <button type="submit" :disabled="!props.isLoggedIn">Post erstellen</button>
     </div>
     <p v-if="error" class="error">{{ error }}</p>
   </form>
@@ -74,6 +90,7 @@
 
 <script setup lang="ts">
 import { computed, reactive, ref } from 'vue'
+import { RouterLink } from 'vue-router'
 
 type NewPost = {
   title: string
@@ -82,6 +99,10 @@ type NewPost = {
   rating: number
   isAnonymous: boolean
 }
+
+const props = defineProps<{
+  isLoggedIn: boolean
+}>()
 
 const emit = defineEmits<{
   createPost: [post: NewPost]
@@ -108,6 +129,11 @@ const error = ref('')
 
 const submitPost = () => {
   error.value = ''
+
+  if (!props.isLoggedIn) {
+    error.value = 'Bitte melde dich an, um einen Beitrag zu erstellen.'
+    return
+  }
 
   if (!form.title.trim() || !form.body.trim()) {
     error.value = 'Bitte Titel und Text eingeben.'
@@ -145,6 +171,10 @@ const submitPost = () => {
   box-shadow: var(--shadow-soft);
 }
 
+.composer.locked {
+  background: #fbfcff;
+}
+
 .composer-head {
   display: flex;
   align-items: center;
@@ -180,6 +210,44 @@ const submitPost = () => {
   font-weight: 900;
 }
 
+.login-required {
+  border: 1px solid #f6c9cd;
+  border-radius: 8px;
+  background: #fff0f1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  margin-bottom: 14px;
+  padding: 12px;
+}
+
+.login-required strong,
+.login-required p {
+  margin: 0;
+}
+
+.login-required strong {
+  color: var(--red-dark);
+}
+
+.login-required p {
+  margin-top: 3px;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.login-required a {
+  border-radius: 8px;
+  background: var(--red);
+  color: white;
+  padding: 10px 12px;
+  text-decoration: none;
+  font-weight: 900;
+  white-space: nowrap;
+}
+
 label {
   min-width: 0;
   display: block;
@@ -211,6 +279,13 @@ input:focus,
 textarea:focus {
   border-color: rgba(49, 95, 217, 0.5);
   box-shadow: 0 0 0 4px rgba(49, 95, 217, 0.1);
+}
+
+input:disabled,
+textarea:disabled,
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.62;
 }
 
 textarea {

@@ -13,29 +13,36 @@
       </header>
 
       <article class="opened-post">
-        <div class="post-topline">
-          <div class="post-meta">
-            <span class="category">{{ post.category }}</span>
-            <span>{{ post.createdAt }}</span>
-            <span>von {{ post.author }}</span>
-          </div>
-
-          <div class="rating-badge" aria-label="Bewertung">
-            <strong>{{ post.rating.toFixed(1) }}</strong>
-            <span>Bewertung</span>
+        <div class="vote-column" aria-label="Stimmen">
+          <div class="vote-lamp">
+            <span class="vote-icon up" aria-hidden="true">👍</span>
+            <strong>{{ post.votes }}</strong>
+            <span class="vote-icon down" aria-hidden="true">👎</span>
           </div>
         </div>
 
-        <p class="post-body">{{ post.body }}</p>
+        <div class="post-content" :class="categoryTone(post.category)">
+          <div class="post-head">
+            <div class="post-meta">
+              <span class="category" :class="categoryTone(post.category)">{{ post.category }}</span>
+              <span>{{ post.author }}</span>
+              <span>{{ post.createdAt }}</span>
+            </div>
 
-        <footer>
-          <div class="study-tags" aria-label="Studieninformationen">
-            <span>#{{ normalizedStudyProgram(post.studyProgram) }}</span>
-            <span>#{{ post.semester }}Semester</span>
+            <div class="rating-badge" aria-label="Bewertung">
+              <strong>{{ post.rating.toFixed(1) }}</strong>
+            </div>
           </div>
-          <span class="helpful">{{ post.helpfulPercent }}% hilfreich</span>
-          <span>{{ post.votes }} Stimmen</span>
-        </footer>
+
+          <h3>{{ post.title }}</h3>
+          <p>{{ post.body }}</p>
+
+          <footer>
+            <span>{{ post.comments.length }} Kommentare</span>
+            <span>{{ normalizedStudyProgram(post.studyProgram) }}</span>
+            <span class="helpful">{{ post.helpfulPercent }}% hilfreich</span>
+          </footer>
+        </div>
       </article>
 
       <section class="comments-area" aria-label="Kommentare zum Beitrag">
@@ -44,27 +51,34 @@
           <strong>{{ post.comments.length }}</strong>
         </div>
 
-        <form class="comment-form" @submit.prevent="submitComment">
-          <div class="comment-fields">
-            <fieldset class="author-choice">
-              <legend>Kommentieren als</legend>
-              <div class="author-options">
-                <label :class="{ active: form.authorMode === 'account' }">
-                  <input v-model="form.authorMode" type="radio" value="account" />
-                  <span>{{ accountName }}</span>
-                </label>
+        <form class="comment-form" :class="{ locked: !props.isLoggedIn }" @submit.prevent="submitComment">
+          <div v-if="!props.isLoggedIn" class="login-required" role="alert">
+            <div>
+              <strong>Anmeldung erforderlich</strong>
+              <p>Du kannst Kommentare erst schreiben, wenn du angemeldet bist.</p>
+            </div>
+            <RouterLink to="/anmelden">Anmelden</RouterLink>
+          </div>
 
-                <label :class="{ active: form.authorMode === 'anonymous' }">
-                  <input v-model="form.authorMode" type="radio" value="anonymous" />
-                  <span>Anonym</span>
-                </label>
+          <div class="comment-fields">
+            <div class="comment-author">
+              <div>
+                <span>Kommentieren als</span>
+                <strong>{{ form.isAnonymous ? 'Anonym' : accountName }}</strong>
               </div>
-            </fieldset>
+
+              <label class="switch-row">
+                <input v-model="form.isAnonymous" :disabled="!props.isLoggedIn" type="checkbox" />
+                <span aria-hidden="true"></span>
+                Anonym kommentieren
+              </label>
+            </div>
 
             <label>
               Kommentar
               <textarea
                 v-model.trim="form.body"
+                :disabled="!props.isLoggedIn"
                 rows="3"
                 placeholder="Schreibe deinen Kommentar..."
               ></textarea>
@@ -73,7 +87,7 @@
 
           <div class="comment-actions">
             <p v-if="error" class="error">{{ error }}</p>
-            <button type="submit">Kommentar senden</button>
+            <button type="submit" :disabled="!props.isLoggedIn">Kommentar senden</button>
           </div>
         </form>
 
@@ -91,11 +105,13 @@
 
 <script setup lang="ts">
 import { reactive, ref } from 'vue'
+import { RouterLink } from 'vue-router'
 import type { Post } from '../data/posts'
 
 // Das Popup bekommt den ausgewaehlten Beitrag von App.vue
 const props = defineProps<{
   accountName: string
+  isLoggedIn: boolean
   post: Post | null
 }>()
 
@@ -106,7 +122,7 @@ const emit = defineEmits<{
 }>()
 
 const form = reactive({
-  authorMode: 'account',
+  isAnonymous: false,
   body: '',
 })
 
@@ -117,6 +133,11 @@ const submitComment = () => {
   error.value = ''
   if (!props.post) return
 
+  if (!props.isLoggedIn) {
+    error.value = 'Bitte melde dich an, um einen Kommentar zu schreiben.'
+    return
+  }
+
   if (!form.body) {
     error.value = 'Bitte Kommentar eingeben.'
     return
@@ -124,7 +145,7 @@ const submitComment = () => {
 
   emit('addComment', {
     postId: props.post.id,
-    author: form.authorMode === 'anonymous' ? 'Anonym' : props.accountName,
+    author: form.isAnonymous ? 'Anonym' : props.accountName,
     body: form.body,
   })
 
@@ -133,6 +154,17 @@ const submitComment = () => {
 
 const normalizedStudyProgram = (studyProgram: string) => {
   return studyProgram.replace(/\s+/g, '')
+}
+
+const categoryTone = (category: string) => {
+  const normalizedCategory = category
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+
+  if (normalizedCategory.includes('raum')) return 'rooms'
+  if (normalizedCategory.includes('campus')) return 'campus'
+  return 'module'
 }
 </script>
 
@@ -195,18 +227,75 @@ header button:hover {
 }
 
 .opened-post {
+  min-width: 0;
+  display: grid;
+  grid-template-columns: 52px minmax(0, 1fr);
+  overflow: hidden;
   border: 1px solid var(--line);
-  border-left: 5px solid var(--red);
   border-radius: 8px;
-  background: var(--surface-soft);
-  padding: 18px;
+  background: var(--surface);
+  box-shadow: var(--shadow-soft);
 }
 
-.post-topline {
+.vote-column {
+  border-right: 1px solid var(--line);
+  background: var(--surface-soft);
+}
+
+.vote-lamp {
+  width: 100%;
+  height: 100%;
+  min-height: 142px;
+  display: grid;
+  grid-template-rows: minmax(42px, 1fr) 34px minmax(42px, 1fr);
+}
+
+.vote-lamp strong {
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+  background: white;
+  color: var(--ink);
+  display: grid;
+  place-items: center;
+  font-size: 14px;
+  font-weight: 900;
+}
+
+.vote-icon {
+  display: grid;
+  place-items: center;
+  font-size: 16px;
+}
+
+.vote-icon.up {
+  background: #e6f7f4;
+  color: #08776c;
+}
+
+.vote-icon.down {
+  background: #fff0f1;
+  color: var(--red-dark);
+}
+
+.post-content {
+  min-width: 0;
+  border-left: 4px solid var(--red);
+  padding: 16px 16px 14px;
+}
+
+.post-content.rooms {
+  border-left-color: var(--teal);
+}
+
+.post-content.campus {
+  border-left-color: var(--gold);
+}
+
+.post-head {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  gap: 14px;
+  gap: 12px;
 }
 
 .post-meta {
@@ -215,13 +304,12 @@ header button:hover {
   flex-wrap: wrap;
   gap: 8px;
   color: var(--soft-muted);
-  font-size: 14px;
-  font-weight: 800;
+  font-size: 12px;
+  font-weight: 900;
 }
 
 .category,
-.helpful,
-.study-tags span {
+.helpful {
   border-radius: 999px;
   display: inline-flex;
   padding: 5px 9px;
@@ -230,72 +318,70 @@ header button:hover {
 
 .category {
   background: #fff0f1;
-  color: var(--red-dark);
+  color: var(--red);
+}
+
+.category.rooms {
+  background: #e6f7f4;
+  color: #08776c;
+}
+
+.category.campus {
+  background: #fff8e6;
+  color: #9a6500;
 }
 
 .rating-badge {
-  min-width: 76px;
+  min-width: 48px;
   border: 1px solid #f6d88a;
   border-radius: 8px;
   background: #fff8e6;
-  color: #9a6500;
-  padding: 8px;
+  color: var(--gold);
+  padding: 6px;
   text-align: center;
 }
 
-.rating-badge strong,
-.rating-badge span {
-  display: block;
-}
-
 .rating-badge strong {
-  color: var(--gold);
-  font-size: 23px;
+  display: block;
+  font-size: 15px;
   line-height: 1;
 }
 
 .rating-badge strong::after {
   content: "★";
   margin-left: 2px;
-  font-size: 13px;
+  font-size: 10px;
 }
 
-.rating-badge span {
-  margin-top: 3px;
-  font-size: 11px;
-  font-weight: 900;
-}
-
-.post-body {
-  margin: 18px 0;
+.post-content h3 {
+  margin: 10px 0 6px;
   color: var(--ink);
-  font-size: 17px;
-  line-height: 1.65;
+  font-size: 21px;
+  line-height: 1.2;
+  overflow-wrap: anywhere;
 }
 
-footer {
+.post-content p {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+.opened-post footer {
   display: flex;
   align-items: center;
   flex-wrap: wrap;
-  gap: 10px;
+  gap: 12px;
+  margin-top: 12px;
   color: var(--muted);
-  font-weight: 800;
+  font-size: 12px;
+  font-weight: 900;
 }
 
 .helpful {
   background: #e6f7f4;
   color: #08776c;
-}
-
-.study-tags {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-}
-
-.study-tags span {
-  background: #eef3ff;
-  color: var(--blue);
 }
 
 .comments-area {
@@ -323,6 +409,48 @@ footer {
   background: var(--surface);
   padding: 14px;
   margin-bottom: 14px;
+}
+
+.comment-form.locked {
+  background: #fbfcff;
+}
+
+.login-required {
+  border: 1px solid #f6c9cd;
+  border-radius: 8px;
+  background: #fff0f1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  margin-bottom: 14px;
+  padding: 12px;
+}
+
+.login-required strong,
+.login-required p {
+  margin: 0;
+}
+
+.login-required strong {
+  color: var(--red-dark);
+}
+
+.login-required p {
+  margin-top: 3px;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.login-required a {
+  border-radius: 8px;
+  background: var(--red);
+  color: white;
+  padding: 10px 12px;
+  text-decoration: none;
+  font-weight: 900;
+  white-space: nowrap;
 }
 
 .comment-fields {
@@ -354,48 +482,86 @@ footer {
   box-shadow: 0 0 0 4px rgba(49, 95, 217, 0.1);
 }
 
-.author-choice {
-  min-width: 0;
-  border: 0;
-  margin: 0;
-  padding: 0;
+.comment-form input:disabled,
+.comment-form textarea:disabled,
+.comment-form button:disabled {
+  cursor: not-allowed;
+  opacity: 0.62;
 }
 
-.author-choice legend {
-  margin-bottom: 8px;
-  color: var(--muted);
-  font-weight: 800;
-}
-
-.author-options {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 8px;
-}
-
-.author-options label {
-  min-height: 42px;
+.comment-author {
   border: 1px solid var(--line);
   border-radius: 8px;
+  background: var(--surface-soft);
   display: flex;
   align-items: center;
-  gap: 9px;
-  margin: 0;
-  background: var(--surface-soft);
-  color: var(--ink);
-  padding: 0 12px;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 11px 12px;
+}
+
+.comment-author span,
+.comment-author strong {
+  display: block;
+}
+
+.comment-author > div > span {
+  color: var(--muted);
+  font-size: 12px;
   font-weight: 900;
 }
 
-.author-options label.active {
-  border-color: rgba(15, 159, 143, 0.35);
-  background: #e6f7f4;
-  color: #08776c;
+.comment-author strong {
+  margin-top: 2px;
+  color: var(--ink);
+  font-size: 15px;
 }
 
-.author-options input {
-  width: auto;
-  accent-color: #0f9f8f;
+.switch-row {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  margin: 0;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 900;
+  white-space: nowrap;
+}
+
+.switch-row input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.switch-row span {
+  width: 34px;
+  height: 20px;
+  border-radius: 999px;
+  background: #c8d0da;
+  position: relative;
+}
+
+.switch-row span::after {
+  content: "";
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: white;
+  transition: transform 160ms ease;
+}
+
+.switch-row input:checked + span {
+  background: var(--red);
+}
+
+.switch-row input:checked + span::after {
+  transform: translateX(14px);
 }
 
 .comment-actions {
@@ -455,16 +621,20 @@ footer {
     padding: 18px;
   }
 
-  header,
-  .post-topline {
-    align-items: flex-start;
-  }
-
   header h2 {
     font-size: 22px;
   }
 
-  .post-topline {
+  .opened-post {
+    grid-template-columns: 44px minmax(0, 1fr);
+  }
+
+  .post-content {
+    padding: 14px;
+  }
+
+  .post-head {
+    align-items: flex-start;
     flex-direction: column;
   }
 
@@ -472,6 +642,15 @@ footer {
     align-items: flex-start;
     flex-direction: column;
     gap: 4px;
+  }
+
+  .comment-author {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .switch-row {
+    white-space: normal;
   }
 
   .comment-actions {

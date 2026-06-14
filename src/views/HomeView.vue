@@ -10,8 +10,22 @@
           </div>
 
           <div class="feed-mode" aria-label="Feed Ansicht">
-            <button type="button" class="active">Neu</button>
-            <button type="button">Top</button>
+            <button
+              type="button"
+              :aria-pressed="feedMode === 'new'"
+              :class="{ active: feedMode === 'new' }"
+              @click="feedMode = 'new'"
+            >
+              Neu
+            </button>
+            <button
+              type="button"
+              :aria-pressed="feedMode === 'top'"
+              :class="{ active: feedMode === 'top' }"
+              @click="feedMode = 'top'"
+            >
+              Top
+            </button>
           </div>
         </div>
 
@@ -28,7 +42,7 @@
           <button
             type="button"
             :class="{ active: activeCategory === 'Alle' }"
-            @click="activeCategory = 'Alle'"
+            @click="setCategory('Alle')"
           >
             Alle
           </button>
@@ -37,14 +51,14 @@
             :key="category"
             type="button"
             :class="{ active: activeCategory === category }"
-            @click="activeCategory = category"
+            @click="setCategory(category)"
           >
             {{ category }}
           </button>
         </div>
       </section>
 
-      <PostComposer @create-post="createPost" />
+      <PostComposer :is-logged-in="isLoggedIn" @create-post="createPost" />
 
       <PostFeed
         :posts="visiblePosts"
@@ -117,6 +131,7 @@
 
   <CommentDialog
     :account-name="currentStudent.name"
+    :is-logged-in="isLoggedIn"
     :post="selectedPost"
     @add-comment="addComment"
     @close="selectedPost = null"
@@ -124,21 +139,26 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import PostComposer from '../components/PostComposer.vue'
 import PostFeed from '../components/PostFeed.vue'
 import CommentDialog from '../components/CommentDialog.vue'
 import { initialPosts, type Post } from '../data/posts'
 
 type VoteDirection = 'up' | 'down'
+type FeedMode = 'new' | 'top'
 type StudentAccount = {
   name: string
   studyProgram: string
   semester: number
 }
 
+const route = useRoute()
+const router = useRouter()
 const accountId = 'test-account'
 const accountStorageKey = 'boice:account'
+const loginStorageKey = 'boice:isLoggedIn'
 const userVotesStorageKey = `boice:votes:${accountId}`
 
 const fallbackStudent: StudentAccount = {
@@ -166,7 +186,14 @@ const loadCurrentStudent = () => {
   }
 }
 
-const currentStudent = loadCurrentStudent()
+const currentStudent = ref<StudentAccount>(loadCurrentStudent())
+const isLoggedIn = ref(localStorage.getItem(loginStorageKey) === 'true')
+
+// Aktualisiert den Login-Zustand, wenn Anmeldung oder Abmeldung passiert.
+const refreshAuthState = () => {
+  isLoggedIn.value = localStorage.getItem(loginStorageKey) === 'true'
+  currentStudent.value = loadCurrentStudent()
+}
 
 const loadUserVotes = () => {
   try {
@@ -193,15 +220,37 @@ const userVotes = ref<Record<number, VoteDirection>>(storedUserVotes)
 const selectedPost = ref<Post | null>(null)
 const search = ref('')
 const activeCategory = ref('Alle')
+const feedMode = ref<FeedMode>('new')
 
 const categories = computed(() => {
   return [...new Set(posts.value.map((post) => post.category))]
 })
 
+const routeCategory = () => {
+  const category = Array.isArray(route.query.category) ? route.query.category[0] : route.query.category
+  return typeof category === 'string' && categories.value.includes(category) ? category : 'Alle'
+}
+
+const setCategory = (category: string) => {
+  activeCategory.value = category
+  void router.push({
+    path: '/beitraege',
+    query: category === 'Alle' ? {} : { category },
+  })
+}
+
+watch(
+  () => route.query.category,
+  () => {
+    activeCategory.value = routeCategory()
+  },
+  { immediate: true },
+)
+
 const visiblePosts = computed(() => {
   const term = search.value.trim().toLowerCase()
 
-  return posts.value
+  const filteredPosts = posts.value
     .filter((post) => activeCategory.value === 'Alle' || post.category === activeCategory.value)
     .filter((post) => {
       if (!term) return true
@@ -218,6 +267,14 @@ const visiblePosts = computed(() => {
         .toLowerCase()
         .includes(term)
     })
+
+  if (feedMode.value === 'top') {
+    return [...filteredPosts].sort((firstPost, secondPost) => {
+      return secondPost.votes - firstPost.votes || secondPost.id - firstPost.id
+    })
+  }
+
+  return filteredPosts
 })
 
 const totalVotes = computed(() => {
@@ -262,13 +319,19 @@ const createPost = (payload: {
   rating: number
   isAnonymous: boolean
 }) => {
+  if (!isLoggedIn.value) {
+    void router.push('/anmelden')
+    return
+  }
+
+  const student = currentStudent.value
   const newPost: Post = {
     id: Date.now(),
     title: payload.title,
     category: payload.category,
-    author: payload.isAnonymous ? 'Anonym' : currentStudent.name,
-    studyProgram: currentStudent.studyProgram,
-    semester: currentStudent.semester,
+    author: payload.isAnonymous ? 'Anonym' : student.name,
+    studyProgram: student.studyProgram,
+    semester: student.semester,
     body: payload.body,
     createdAt: 'gerade eben',
     rating: payload.rating,
@@ -285,6 +348,11 @@ const openComments = (post: Post) => {
 }
 
 const addComment = (payload: { postId: number; author: string; body: string }) => {
+  if (!isLoggedIn.value) {
+    void router.push('/anmelden')
+    return
+  }
+
   const post = posts.value.find((item) => item.id === payload.postId)
   if (!post) return
 
@@ -321,6 +389,17 @@ const votePost = (payload: { id: number; direction: 'up' | 'down' }) => {
   }
   saveUserVotes(userVotes.value)
 }
+
+onMounted(() => {
+  refreshAuthState()
+  window.addEventListener('storage', refreshAuthState)
+  window.addEventListener('boice-auth-changed', refreshAuthState)
+})
+
+onUnmounted(() => {
+  window.removeEventListener('storage', refreshAuthState)
+  window.removeEventListener('boice-auth-changed', refreshAuthState)
+})
 </script>
 
 <style scoped>
