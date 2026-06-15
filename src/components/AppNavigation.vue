@@ -6,7 +6,7 @@
     </RouterLink>
 
     <nav class="side-links" aria-label="Hauptnavigation">
-      <RouterLink to="/">
+      <RouterLink :class="{ 'feed-nav-active': isFeedRoute }" to="/" data-mobile-label="Start">
         <span class="nav-icon" aria-hidden="true">
           <svg viewBox="0 0 24 24">
             <path d="M4 11.5 12 5l8 6.5" />
@@ -14,9 +14,9 @@
             <path d="M10 20v-5h4v5" />
           </svg>
         </span>
-        Startseite
+        <span class="nav-label">Startseite</span>
       </RouterLink>
-      <RouterLink v-if="isLoggedIn" to="/meine-beitraege">
+      <RouterLink v-if="isLoggedIn" to="/meine-beitraege" data-mobile-label="Meine">
         <span class="nav-icon" aria-hidden="true">
           <svg viewBox="0 0 24 24">
             <path d="M7 4h10l2 2v14H5V4h2Z" />
@@ -25,16 +25,16 @@
             <path d="M9 18h4" />
           </svg>
         </span>
-        Meine Beiträge
+        <span class="nav-label">Meine Beiträge</span>
       </RouterLink>
-      <RouterLink v-if="isLoggedIn" to="/benachrichtigungen">
+      <RouterLink v-if="isLoggedIn" to="/benachrichtigungen" data-mobile-label="Hinweise">
         <span class="nav-icon" aria-hidden="true">
           <svg viewBox="0 0 24 24">
             <path d="M18 10a6 6 0 0 0-12 0c0 5-2 6-2 6h16s-2-1-2-6Z" />
             <path d="M10 19a2 2 0 0 0 4 0" />
           </svg>
         </span>
-        Benachrichtigungen
+        <span class="nav-label">Benachrichtigungen</span>
       </RouterLink>
     </nav>
 
@@ -47,25 +47,25 @@
       </div>
 
       <RouterLink
-        :class="{ active: currentCategory === 'Module' }"
-        :to="{ path: '/beitraege', query: { category: 'Module' } }"
+        :class="{ active: currentCategory === 'Übungen' }"
+        :to="{ path: '/beitraege', query: { category: 'Übungen' } }"
       >
         <i class="dot module"></i>
-        Module
+        Übungen
       </RouterLink>
       <RouterLink
-        :class="{ active: currentCategory === 'Räume' }"
-        :to="{ path: '/beitraege', query: { category: 'Räume' } }"
+        :class="{ active: currentCategory === 'Vorlesungen' }"
+        :to="{ path: '/beitraege', query: { category: 'Vorlesungen' } }"
       >
         <i class="dot rooms"></i>
-        Räume
+        Vorlesungen
       </RouterLink>
       <RouterLink
-        :class="{ active: currentCategory === 'Campus' }"
-        :to="{ path: '/beitraege', query: { category: 'Campus' } }"
+        :class="{ active: currentCategory === 'Praktikum' }"
+        :to="{ path: '/beitraege', query: { category: 'Praktikum' } }"
       >
         <i class="dot campus"></i>
-        Campus
+        Praktikum
       </RouterLink>
     </section>
 
@@ -135,6 +135,8 @@ const currentCategory = computed(() => {
   const category = Array.isArray(route.query.category) ? route.query.category[0] : route.query.category
   return typeof category === 'string' ? category : 'Alle'
 })
+
+const isFeedRoute = computed(() => route.path === '/' || route.path === '/beitraege')
 
 const logout = () => {
   localStorage.setItem(loginStorageKey, 'false')
@@ -241,13 +243,15 @@ onUnmounted(() => {
 }
 
 .side-links a:hover,
-.side-links a.router-link-active {
+.side-links a.router-link-active,
+.side-links a.feed-nav-active {
   background: #eef3ff;
   color: var(--blue);
 }
 
 .side-links a:hover .nav-icon,
-.side-links a.router-link-active .nav-icon {
+.side-links a.router-link-active .nav-icon,
+.side-links a.feed-nav-active .nav-icon {
   border-color: rgba(49, 95, 217, 0.24);
   background: white;
   color: var(--blue);
@@ -437,23 +441,228 @@ onUnmounted(() => {
   background: #fff0f1;
 }
 
-@media (max-width: 900px) {
+@media (max-width: 1180px) {
   .sidebar {
-    position: static;
+    position: sticky;
+    top: 0;
     width: 100%;
     min-height: auto;
     border-right: 0;
     border-bottom: 1px solid var(--line);
-    padding: 14px 16px;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas:
+      "brand account"
+      "categories categories";
+    gap: 10px;
+    padding: 10px 0;
+    background: rgba(246, 248, 251, 0.96);
   }
 
-  .side-links,
+  .brand {
+    grid-area: brand;
+    align-self: center;
+  }
+
+  .brand img {
+    width: 98px;
+  }
+
+  .side-links {
+    position: fixed;
+    z-index: 40;
+    right: 12px;
+    bottom: 12px;
+    left: 12px;
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: minmax(0, 1fr);
+    gap: 8px;
+    margin-top: 0;
+    border: 1px solid rgba(204, 213, 225, 0.9);
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.98);
+    padding: 7px;
+    box-shadow: 0 18px 38px rgba(31, 42, 55, 0.18);
+    backdrop-filter: blur(14px);
+  }
+
+  .side-links a {
+    min-width: 0;
+    min-height: 56px;
+    border: 1px solid transparent;
+    border-radius: 9px;
+    background: transparent;
+    color: var(--muted);
+    flex-direction: column;
+    justify-content: center;
+    gap: 4px;
+    padding: 6px 4px;
+    font-size: 0;
+    text-align: center;
+  }
+
+  .side-links a::after {
+    content: attr(data-mobile-label);
+    display: block;
+    max-width: 100%;
+    overflow: hidden;
+    color: currentColor;
+    font-size: 11px;
+    font-weight: 900;
+    line-height: 1;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .side-links a:hover,
+  .side-links a.router-link-active,
+  .side-links a.feed-nav-active {
+    border-color: rgba(49, 95, 217, 0.18);
+    background: #eef3ff;
+    color: var(--blue);
+  }
+
+  .side-links .nav-icon {
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+  }
+
+  .side-links .nav-icon svg {
+    width: 16px;
+    height: 16px;
+  }
+
   .side-categories {
+    grid-area: categories;
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 6px;
+    margin-top: 0;
+  }
+
+  .side-section-head {
+    display: contents;
+  }
+
+  .side-section-head > span {
     display: none;
   }
 
+  .side-section-head a,
+  .side-categories > a {
+    min-width: 0;
+    min-height: 36px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: white;
+    justify-content: center;
+    gap: 5px;
+    padding: 0 8px;
+    font-size: 12px;
+    text-align: center;
+  }
+
+  .side-section-head a.active,
+  .side-categories > a.active {
+    border-color: rgba(227, 6, 19, 0.3);
+    background: #fff0f1;
+    color: var(--red);
+  }
+
+  .side-categories .dot {
+    width: 7px;
+    height: 7px;
+    box-shadow: none;
+  }
+
   .sidebar-bottom {
-    margin-top: 12px;
+    grid-area: account;
+    justify-self: end;
+    min-width: 0;
+    margin-top: 0;
+  }
+
+  .side-auth {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .side-auth a {
+    min-height: 34px;
+    padding: 0 9px;
+    font-size: 12px;
+    box-shadow: none;
+    white-space: nowrap;
+  }
+
+  .side-account {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .account-card {
+    padding: 6px;
+  }
+
+  .account-card > span {
+    width: 28px;
+    height: 28px;
+    font-size: 12px;
+  }
+
+  .account-card small {
+    display: none;
+  }
+
+  .side-account strong {
+    max-width: 72px;
+    font-size: 13px;
+  }
+
+  .logout-button {
+    width: auto;
+    min-height: 34px;
+    padding: 0 9px;
+    font-size: 12px;
+    white-space: nowrap;
+  }
+}
+
+@media (max-width: 420px) {
+  .brand img {
+    width: 86px;
+  }
+
+  .side-categories {
+    gap: 5px;
+  }
+
+  .side-section-head a,
+  .side-categories > a {
+    min-height: 34px;
+    padding: 0 6px;
+    font-size: 11px;
+  }
+
+  .side-links {
+    right: 10px;
+    bottom: 10px;
+    left: 10px;
+    gap: 6px;
+    padding: 6px;
+  }
+
+  .side-links a {
+    min-height: 52px;
+  }
+
+  .side-links .nav-icon {
+    width: 26px;
+    height: 26px;
   }
 }
 </style>

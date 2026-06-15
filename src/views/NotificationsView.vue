@@ -1,62 +1,52 @@
 <template>
-  <section class="account-page">
-    <header class="page-title">
-      <div>
-        <p>Mein Bereich</p>
-        <h1>Benachrichtigungen</h1>
-      </div>
-      <span>{{ unreadCount }} neu</span>
-    </header>
+  <div class="page-layout account-layout">
+    <main class="main-column">
+      <section class="for-you-card">
+        <div class="for-you-head">
+          <div>
+            <h1>Benachrichtigungen</h1>
+          </div>
+        </div>
+      </section>
 
-    <section class="summary-row" aria-label="Übersicht">
-      <article>
-        <span>Neu</span>
-        <strong>{{ unreadCount }}</strong>
-      </article>
-      <article>
-        <span>Kommentare</span>
-        <strong>2</strong>
-      </article>
-      <article>
-        <span>Reaktionen</span>
-        <strong>2</strong>
-      </article>
-    </section>
-
-    <section class="notification-list" aria-label="Benachrichtigungsliste">
-      <article
-        v-for="notification in notifications"
-        :key="notification.id"
-        class="notification-card"
-        :class="{ unread: notification.isUnread }"
-      >
-        <div class="notification-icon" :class="notification.tone" aria-hidden="true">
-          {{ notification.icon }}
+      <section class="notification-list" aria-label="Benachrichtigungsliste">
+        <div class="feed-head">
+          <strong>Aktuelle Hinweise</strong>
+          <span>{{ notifications.length }} Meldungen</span>
         </div>
 
-        <div class="notification-content">
-          <div class="notification-meta">
-            <span class="type-label" :class="notification.tone">{{ notification.type }}</span>
-            <span>{{ notification.time }}</span>
+        <article
+          v-for="notification in notifications"
+          :key="notification.id"
+          class="notification-card"
+          :class="notification.tone"
+        >
+          <div class="notification-icon" :class="notification.tone" aria-hidden="true">
+            {{ notification.icon }}
           </div>
 
-          <h2>{{ notification.title }}</h2>
-          <p>{{ notification.body }}</p>
+          <div class="notification-content">
+            <div class="notification-meta">
+              <span class="type-label" :class="notification.tone">{{ notification.type }}</span>
+              <span>{{ notification.time }}</span>
+            </div>
 
-          <footer>
-            <span>{{ notification.postTitle }}</span>
-            <strong v-if="notification.isUnread">neu</strong>
-          </footer>
-        </div>
-      </article>
-    </section>
-  </section>
+            <h3>{{ notification.title }}</h3>
+            <p>{{ notification.body }}</p>
+
+            <footer>
+              <span>{{ notification.postTitle }}</span>
+            </footer>
+          </div>
+        </article>
+      </section>
+    </main>
+
+  </div>
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
-
-type NotificationTone = 'comment' | 'vote' | 'info'
+type NotificationTone = 'upvote' | 'downvote' | 'comment'
 
 type StaticNotification = {
   id: number
@@ -67,187 +57,165 @@ type StaticNotification = {
   time: string
   icon: string
   tone: NotificationTone
-  isUnread: boolean
 }
 
 const notifications: StaticNotification[] = [
   {
     id: 1,
+    type: 'Positive Bewertung',
+    title: 'Dein Beitrag wurde positiv bewertet',
+    body: 'Eine studierende Person findet deinen Hinweis zur Java-Übung hilfreich.',
+    postTitle: 'Java Übungen brauchen mehr Beispiele',
+    time: 'gerade eben',
+    icon: '+',
+    tone: 'upvote',
+  },
+  {
+    id: 2,
     type: 'Kommentar',
     title: 'Mina hat deinen Beitrag kommentiert',
     body: 'Mehr Beispiele wären wirklich hilfreich, besonders vor der Klausur.',
     postTitle: 'Java Übungen brauchen mehr Beispiele',
-    time: 'gerade eben',
+    time: 'vor 8 Minuten',
     icon: 'K',
     tone: 'comment',
-    isUnread: true,
-  },
-  {
-    id: 2,
-    type: 'Hilfreich',
-    title: 'Dein Beitrag wurde hilfreich bewertet',
-    body: 'Drei Studierende fanden deinen Hinweis zu den Lernräumen hilfreich.',
-    postTitle: 'Mehr Steckdosen in Lernräumen',
-    time: 'vor 18 Minuten',
-    icon: '+',
-    tone: 'vote',
-    isUnread: true,
   },
   {
     id: 3,
-    type: 'Campus',
-    title: 'Neue Reaktion im Campus-Bereich',
-    body: 'Zum WLAN im Gebäude C gibt es weitere Erfahrungen von anderen Studierenden.',
-    postTitle: 'WLAN im Gebäude C ist instabil',
-    time: 'vor 1 Stunde',
-    icon: '!',
-    tone: 'info',
-    isUnread: false,
-  },
-  {
-    id: 4,
-    type: 'Kommentar',
-    title: 'Omar hat einen Vorschlag ergänzt',
-    body: 'Vielleicht könnte man die Übungsblätter mit kurzen Musterlösungen veröffentlichen.',
-    postTitle: 'Java Übungen brauchen mehr Beispiele',
-    time: 'gestern',
-    icon: 'K',
-    tone: 'comment',
-    isUnread: false,
+    type: 'Negative Bewertung',
+    title: 'Dein Beitrag wurde negativ bewertet',
+    body: 'Eine studierende Person bewertet deinen Vorschlag zur Vorlesung kritisch.',
+    postTitle: 'Vorlesung Datenbanken braucht mehr Wiederholung',
+    time: 'vor 18 Minuten',
+    icon: '-',
+    tone: 'downvote',
   },
 ]
 
-const unreadCount = computed(() => {
-  return notifications.filter((notification) => notification.isUnread).length
-})
 </script>
 
 <style scoped>
-.account-page {
-  width: 100%;
-  max-width: 820px;
-  margin: 0 auto 48px;
+.page-layout {
+  width: min(740px, 100%);
+  margin: 0 auto;
   display: grid;
-  gap: 14px;
+  grid-template-columns: minmax(0, 1fr);
+  align-items: start;
+  gap: 18px;
 }
 
-.page-title {
+.main-column {
+  min-width: 0;
+  display: grid;
+  gap: 18px;
+}
+
+.for-you-card,
+.notification-card {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface);
+  box-shadow: var(--shadow-soft);
+}
+
+.for-you-card {
+  padding: 18px;
+}
+
+.for-you-head {
   display: flex;
-  align-items: flex-end;
+  align-items: flex-start;
   justify-content: space-between;
   gap: 16px;
 }
 
-.page-title p {
-  margin: 0 0 4px;
-  color: var(--red);
-  font-size: 12px;
-  font-weight: 900;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-}
-
-.page-title h1 {
+.for-you-card h1 {
   margin: 0;
-  font-size: 34px;
+  font-size: clamp(38px, 5vw, 54px);
   line-height: 1;
 }
 
-.page-title > span {
-  border-radius: 999px;
-  background: #fff0f1;
-  color: var(--red);
-  padding: 7px 10px;
+.feed-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin: -2px 0 10px;
+  color: var(--muted);
   font-size: 13px;
   font-weight: 900;
-  white-space: nowrap;
-}
-
-.summary-row {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 10px;
-}
-
-.summary-row article {
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  background: var(--surface);
-  padding: 12px 14px;
-  box-shadow: var(--shadow-soft);
-}
-
-.summary-row span,
-.summary-row strong {
-  display: block;
-}
-
-.summary-row span {
-  color: var(--muted);
-  font-size: 12px;
-  font-weight: 900;
-}
-
-.summary-row strong {
-  margin-top: 5px;
-  font-size: 24px;
-  line-height: 1;
 }
 
 .notification-list {
-  display: grid;
-  gap: 12px;
+  min-width: 0;
+  margin: 0 0 48px;
 }
 
 .notification-card {
   min-width: 0;
-  border: 1px solid var(--line);
-  border-left: 4px solid var(--line);
-  border-radius: 8px;
-  background: var(--surface);
   display: grid;
-  grid-template-columns: 44px minmax(0, 1fr);
-  gap: 14px;
-  padding: 14px;
-  box-shadow: var(--shadow-soft);
+  grid-template-columns: 52px minmax(0, 1fr);
+  gap: 0;
+  margin-bottom: 14px;
+  overflow: hidden;
+  transition:
+    border-color 160ms ease,
+    transform 160ms ease,
+    box-shadow 160ms ease;
 }
 
-.notification-card.unread {
-  border-left-color: var(--red);
-  background: linear-gradient(90deg, #fff8f8 0, var(--surface) 42%);
+.notification-card:hover {
+  border-color: rgba(227, 6, 19, 0.2);
+  box-shadow: var(--shadow);
+  transform: translateY(-1px);
 }
 
 .notification-icon {
-  width: 44px;
-  height: 44px;
-  border-radius: 8px;
+  min-height: 126px;
+  border-right: 1px solid var(--line);
+  background: var(--surface-soft);
   color: white;
   display: grid;
   place-items: center;
   font-weight: 900;
 }
 
-.notification-icon.comment {
-  background: var(--red);
-}
-
-.notification-icon.vote {
+.notification-icon.upvote {
   background: var(--teal);
 }
 
-.notification-icon.info {
-  background: var(--gold);
+.notification-icon.downvote {
+  background: var(--red);
+}
+
+.notification-icon.comment {
+  background: var(--blue);
 }
 
 .notification-content {
   min-width: 0;
+  border-left: 4px solid var(--red);
+  padding: 16px 16px 14px;
+}
+
+.notification-content {
+  border-left-color: var(--blue);
+}
+
+.notification-card.upvote .notification-content {
+  border-left-color: var(--teal);
+}
+
+.notification-card.downvote .notification-content {
+  border-left-color: var(--red);
 }
 
 .notification-meta {
   display: flex;
   align-items: center;
+  flex-wrap: wrap;
   justify-content: space-between;
-  gap: 12px;
+  gap: 8px;
   color: var(--soft-muted);
   font-size: 12px;
   font-weight: 900;
@@ -260,24 +228,25 @@ const unreadCount = computed(() => {
   font-weight: 900;
 }
 
-.type-label.comment {
-  background: #fff0f1;
-  color: var(--red);
-}
-
-.type-label.vote {
+.type-label.upvote {
   background: #e6f7f4;
   color: #08776c;
 }
 
-.type-label.info {
-  background: #fff8e6;
-  color: #9a6500;
+.type-label.downvote {
+  background: #fff0f1;
+  color: var(--red);
 }
 
-.notification-card h2 {
+.type-label.comment {
+  background: #eef3ff;
+  color: var(--blue);
+}
+
+.notification-card h3 {
   margin: 10px 0 6px;
-  font-size: 20px;
+  color: var(--ink);
+  font-size: 21px;
   line-height: 1.2;
   overflow-wrap: anywhere;
 }
@@ -294,7 +263,7 @@ const unreadCount = computed(() => {
   align-items: center;
   flex-wrap: wrap;
   gap: 10px;
-  margin-top: 10px;
+  margin-top: 12px;
   color: var(--blue);
   font-size: 12px;
   font-weight: 900;
@@ -307,20 +276,29 @@ const unreadCount = computed(() => {
   padding: 4px 8px;
 }
 
-@media (max-width: 720px) {
-  .page-title {
-    align-items: flex-start;
-    flex-direction: column;
+@media (max-width: 1180px) {
+  .page-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 760px) {
+  .page-layout {
+    grid-template-columns: 1fr;
   }
 
-  .summary-row {
-    grid-template-columns: 1fr;
+  .for-you-head {
+    flex-direction: column;
   }
 }
 
 @media (max-width: 520px) {
   .notification-card {
-    grid-template-columns: 1fr;
+    grid-template-columns: 44px minmax(0, 1fr);
+  }
+
+  .notification-content {
+    padding: 14px;
   }
 
   .notification-meta {

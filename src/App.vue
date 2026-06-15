@@ -20,15 +20,19 @@ import AppNavigation from './components/AppNavigation.vue'
   padding: 18px 28px 48px 252px;
 }
 
-@media (max-width: 900px) {
+@media (max-width: 1180px) {
   .app {
-    padding: 0 16px 36px;
+    padding: 0 16px 104px;
+  }
+
+  .app > :deep(:not(.sidebar)) {
+    margin-top: 14px;
   }
 }
 
 @media (max-width: 640px) {
   .app {
-    padding: 0 12px 32px;
+    padding: 0 12px 100px;
   }
 }
 

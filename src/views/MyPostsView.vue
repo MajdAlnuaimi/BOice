@@ -1,63 +1,55 @@
 <template>
-  <section class="account-page">
-    <header class="page-title">
-      <div>
-        <p>Mein Bereich</p>
-        <h1>Meine Beiträge</h1>
-      </div>
-      <span>{{ ownPosts.length }} Beiträge</span>
-    </header>
-
-    <section class="summary-row" aria-label="Übersicht">
-      <article>
-        <span>Stimmen</span>
-        <strong>24</strong>
-      </article>
-      <article>
-        <span>Kommentare</span>
-        <strong>7</strong>
-      </article>
-      <article>
-        <span>Hilfreich</span>
-        <strong>86%</strong>
-      </article>
-    </section>
-
-    <section class="post-list" aria-label="Eigene Beiträge">
-      <article v-for="post in ownPosts" :key="post.id" class="post-card">
-        <div class="vote-column">
-          <div class="vote-lamp">
-            <span class="vote-icon up" aria-hidden="true">👍</span>
-            <strong>{{ post.votes }}</strong>
-            <span class="vote-icon down" aria-hidden="true">👎</span>
+  <div class="page-layout account-layout">
+    <main class="main-column">
+      <section class="for-you-card">
+        <div class="for-you-head">
+          <div>
+            <h1>Meine Beiträge</h1>
           </div>
+
+          <span class="status-pill">{{ ownPosts.length }} Beiträge</span>
+        </div>
+      </section>
+
+      <section class="post-list" aria-label="Eigene Beiträge">
+        <div class="feed-head">
+          <strong>Eigene Beiträge</strong>
+          <span>Test</span>
         </div>
 
-        <div class="post-content" :class="post.tone">
-          <div class="post-head">
-            <div class="post-meta">
-              <span class="category" :class="post.tone">{{ post.category }}</span>
-              <span>{{ post.visibility }}</span>
-              <span>{{ post.createdAt }}</span>
-            </div>
-
-            <div class="rating-badge" aria-label="Bewertung">
-              <strong>{{ post.rating }}</strong>
+        <article v-for="post in ownPosts" :key="post.id" class="post-card">
+          <div class="vote-column">
+            <div class="vote-lamp">
+              <span class="vote-icon up" aria-hidden="true">👍</span>
+              <strong>{{ post.votes }}</strong>
+              <span class="vote-icon down" aria-hidden="true">👎</span>
             </div>
           </div>
 
-          <h2>{{ post.title }}</h2>
-          <p>{{ post.body }}</p>
+          <div class="post-content" :class="post.tone">
+            <div class="post-head">
+              <div class="post-meta">
+                <span class="category" :class="post.tone">{{ post.category }}</span>
+                <span>{{ post.visibility }}</span>
+                <span>{{ post.createdAt }}</span>
+              </div>
 
-          <footer>
-            <span>{{ post.comments }} Kommentare</span>
-            <span class="helpful">{{ post.helpful }}% hilfreich</span>
-            <span>{{ post.status }}</span>
-          </footer>
-        </div>
-      </article>
-    </section>
-  </section>
+              <div class="rating-badge" aria-label="Bewertung">
+                <strong>{{ post.rating }}</strong>
+              </div>
+            </div>
+
+            <h3>{{ post.title }}</h3>
+            <p>{{ post.body }}</p>
+
+            <footer>
+              <span>{{ post.comments }} Kommentare</span>
+            </footer>
+          </div>
+        </article>
+      </section>
+    </main>
+  </div>
 </template>
 
 <script setup lang="ts">
@@ -71,140 +63,136 @@ type OwnPost = {
   visibility: string
   votes: number
   comments: number
-  helpful: number
   rating: string
-  status: string
 }
 
 const ownPosts: OwnPost[] = [
   {
     id: 1,
     title: 'Java Übungen brauchen mehr Beispiele',
-    category: 'Module',
+    category: 'Übungen',
     tone: 'module',
     body: 'Bei den Aufgaben wäre ein kurzer Lösungsansatz hilfreich. Dann kann man besser einschätzen, ob man auf dem richtigen Weg ist.',
     createdAt: 'heute',
     visibility: 'Test',
     votes: 11,
     comments: 3,
-    helpful: 88,
     rating: '3.8',
-    status: 'veröffentlicht',
   },
   {
     id: 2,
-    title: 'Mehr Steckdosen in Lernräumen',
-    category: 'Räume',
+    title: 'Vorlesung Datenbanken braucht mehr Wiederholung',
+    category: 'Vorlesungen',
     tone: 'rooms',
-    body: 'Viele Arbeitsplätze sind gut, aber ohne Steckdose wird es bei langen Lerntagen schwierig.',
+    body: 'Die Inhalte bauen stark aufeinander auf. Eine kurze Wiederholung vor neuen Themen würde das Mitkommen leichter machen.',
     createdAt: 'gestern',
     visibility: 'anonym',
     votes: 8,
     comments: 2,
-    helpful: 91,
     rating: '4.1',
-    status: 'veröffentlicht',
   },
   {
     id: 3,
-    title: 'WLAN im Gebäude C ist instabil',
-    category: 'Campus',
+    title: 'Praktikum Webtechnik klarer strukturieren',
+    category: 'Praktikum',
     tone: 'campus',
-    body: 'In mehreren Vorlesungen ist die Verbindung abgebrochen. Für digitale Unterlagen ist das störend.',
+    body: 'Die Abgaben funktionieren besser, wenn Anforderungen, Bewertung und Beispielausgabe direkt in einer Checkliste stehen.',
     createdAt: 'vor 3 Tagen',
     visibility: 'Test',
     votes: 5,
     comments: 2,
-    helpful: 79,
     rating: '3.5',
-    status: 'beobachtet',
   },
 ]
+
 </script>
 
 <style scoped>
-.account-page {
-  width: 100%;
-  max-width: 820px;
-  margin: 0 auto 48px;
+.page-layout {
+  width: min(740px, 100%);
+  margin: 0 auto;
   display: grid;
-  gap: 14px;
+  grid-template-columns: minmax(0, 1fr);
+  align-items: start;
+  gap: 18px;
 }
 
-.page-title {
+.main-column {
+  min-width: 0;
+  display: grid;
+  gap: 18px;
+}
+
+.for-you-card {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface);
+  box-shadow: var(--shadow-soft);
+}
+
+.for-you-card {
+  padding: 18px;
+}
+
+.for-you-head {
   display: flex;
-  align-items: flex-end;
+  align-items: flex-start;
   justify-content: space-between;
   gap: 16px;
 }
 
-.page-title p {
-  margin: 0 0 4px;
-  color: var(--red);
-  font-size: 12px;
-  font-weight: 900;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-}
-
-.page-title h1 {
+.for-you-card h1 {
   margin: 0;
-  font-size: 34px;
+  font-size: clamp(38px, 5vw, 54px);
   line-height: 1;
 }
 
-.page-title > span {
-  color: var(--muted);
+.status-pill {
+  border-radius: 8px;
+  background: var(--red);
+  color: white;
+  padding: 8px 10px;
   font-size: 13px;
   font-weight: 900;
   white-space: nowrap;
 }
 
-.summary-row {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 10px;
-}
-
-.summary-row article {
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  background: var(--surface);
-  padding: 12px 14px;
-  box-shadow: var(--shadow-soft);
-}
-
-.summary-row span,
-.summary-row strong {
-  display: block;
-}
-
-.summary-row span {
+.feed-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin: -2px 0 10px;
   color: var(--muted);
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 900;
 }
 
-.summary-row strong {
-  margin-top: 5px;
-  font-size: 24px;
-  line-height: 1;
-}
-
 .post-list {
-  display: grid;
-  gap: 14px;
+  min-width: 0;
+  margin: 0 0 48px;
 }
 
 .post-card {
   min-width: 0;
   display: grid;
   grid-template-columns: 52px minmax(0, 1fr);
+  margin-bottom: 14px;
   overflow: hidden;
   border: 1px solid var(--line);
   border-radius: 8px;
   background: var(--surface);
   box-shadow: var(--shadow-soft);
+  transition:
+    border-color 160ms ease,
+    transform 160ms ease,
+    box-shadow 160ms ease;
+}
+
+.post-card:hover {
+  border-color: rgba(227, 6, 19, 0.2);
+  box-shadow: var(--shadow);
+  transform: translateY(-1px);
 }
 
 .vote-column {
@@ -221,12 +209,12 @@ const ownPosts: OwnPost[] = [
 }
 
 .vote-lamp strong {
+  display: grid;
+  place-items: center;
   border-top: 1px solid var(--line);
   border-bottom: 1px solid var(--line);
   background: white;
   color: var(--ink);
-  display: grid;
-  place-items: center;
   font-size: 14px;
   font-weight: 900;
 }
@@ -278,8 +266,7 @@ const ownPosts: OwnPost[] = [
   font-weight: 900;
 }
 
-.category,
-.helpful {
+.category {
   border-radius: 999px;
   display: inline-flex;
   padding: 5px 9px;
@@ -323,8 +310,9 @@ const ownPosts: OwnPost[] = [
   font-size: 10px;
 }
 
-.post-card h2 {
+.post-card h3 {
   margin: 10px 0 6px;
+  color: var(--ink);
   font-size: 21px;
   line-height: 1.2;
   overflow-wrap: anywhere;
@@ -348,19 +336,19 @@ const ownPosts: OwnPost[] = [
   font-weight: 900;
 }
 
-.helpful {
-  background: #e6f7f4;
-  color: #08776c;
+@media (max-width: 1180px) {
+  .page-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
 }
 
-@media (max-width: 720px) {
-  .page-title {
-    align-items: flex-start;
-    flex-direction: column;
+@media (max-width: 760px) {
+  .page-layout {
+    grid-template-columns: 1fr;
   }
 
-  .summary-row {
-    grid-template-columns: 1fr;
+  .for-you-head {
+    flex-direction: column;
   }
 }
 

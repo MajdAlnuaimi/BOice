@@ -4,9 +4,7 @@
       <section id="start" class="for-you-card">
         <div class="for-you-head">
           <div>
-            <p class="label">BOice Campus Feed</p>
-            <h1>For You Page</h1>
-            <p>Was Studierende gerade bewegt, gesammelt an einem Ort.</p>
+            <h1>BOice Campus Feed</h1>
           </div>
 
           <div class="feed-mode" aria-label="Feed Ansicht">
@@ -34,7 +32,7 @@
           <input
             v-model="search"
             type="search"
-            placeholder="Suchen nach Modul, Raum, Campus..."
+            placeholder="Suchen nach Übung, Vorlesung, Praktikum..."
           />
         </label>
 
@@ -58,9 +56,14 @@
         </div>
       </section>
 
-      <PostComposer :is-logged-in="isLoggedIn" @create-post="createPost" />
+      <PostComposer
+        :account-name="currentStudent.name"
+        :is-logged-in="isLoggedIn"
+        @create-post="createPost"
+      />
 
       <PostFeed
+        :active-category="activeCategory"
         :posts="visiblePosts"
         :user-votes="userVotes"
         @open-comments="openComments"
@@ -84,10 +87,9 @@
         </article>
       </section>
 
-      <section class="rail-card pulse-card" aria-label="Campus Pulse">
+      <section class="rail-card pulse-card" aria-label="Statistik">
         <div class="rail-head">
-          <h2>Campus Pulse</h2>
-          <span>Live</span>
+          <h2>Statistik</h2>
         </div>
 
         <div class="pulse-grid">
@@ -443,25 +445,10 @@ onUnmounted(() => {
   gap: 16px;
 }
 
-.label {
-  margin: 0 0 4px;
-  color: var(--red);
-  font-size: 12px;
-  font-weight: 900;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-}
-
 .for-you-card h1 {
   margin: 0;
-  font-size: clamp(38px, 5vw, 54px);
+  font-size: clamp(30px, 4vw, 42px);
   line-height: 1;
-}
-
-.for-you-card p {
-  margin: 10px 0 0;
-  color: var(--muted);
-  font-weight: 800;
 }
 
 .feed-mode {

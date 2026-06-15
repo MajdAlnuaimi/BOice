@@ -2,7 +2,7 @@
   <!-- Formular zum Erstellen eines neuen Beitrags -->
   <form class="composer" :class="{ locked: !props.isLoggedIn }" @submit.prevent="submitPost">
     <div class="composer-head">
-      <span class="composer-avatar">BO</span>
+      <span class="composer-avatar">{{ accountInitials }}</span>
       <div>
         <h2>Was möchtest du teilen?</h2>
         <p>{{ form.isAnonymous ? 'Anonym posten' : 'Mit Account posten' }}</p>
@@ -23,7 +23,7 @@
         v-model="form.title"
         :disabled="!props.isLoggedIn"
         type="text"
-        placeholder="Kurzer Titel, z. B. Java Übungen"
+        placeholder="Kurzer Titel, z. B. Java Übung 4"
       />
     </label>
 
@@ -101,6 +101,7 @@ type NewPost = {
 }
 
 const props = defineProps<{
+  accountName: string
   isLoggedIn: boolean
 }>()
 
@@ -108,12 +109,12 @@ const emit = defineEmits<{
   createPost: [post: NewPost]
 }>()
 
-const categories = ['Module', 'Räume', 'Campus']
+const categories = ['Übungen', 'Vorlesungen', 'Praktikum']
 const ratingSteps = [1, 2, 3, 4, 5]
 
 const form = reactive({
   title: '',
-  category: 'Module',
+  category: 'Übungen',
   body: '',
   rating: 0,
   isAnonymous: false,
@@ -123,6 +124,17 @@ const hoverRating = ref(0)
 const visibleRating = computed(() => hoverRating.value || form.rating)
 const visibleRatingText = computed(() => {
   return visibleRating.value ? `${visibleRating.value},0 von 5` : 'Noch keine Bewertung'
+})
+
+const accountInitials = computed(() => {
+  if (!props.isLoggedIn) return 'BO'
+
+  const nameParts = props.accountName.trim().split(/\s+/).filter(Boolean)
+  const firstName = nameParts[0] ?? ''
+  const lastName = nameParts.length > 1 ? nameParts[nameParts.length - 1] : ''
+  const initials = `${firstName[0] ?? ''}${lastName[0] ?? ''}`.toUpperCase()
+
+  return initials || 'BO'
 })
 
 const error = ref('')
@@ -154,7 +166,7 @@ const submitPost = () => {
   })
 
   form.title = ''
-  form.category = 'Module'
+  form.category = 'Übungen'
   form.body = ''
   form.rating = 0
   form.isAnonymous = false

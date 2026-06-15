@@ -3,7 +3,7 @@
   <section id="beitraege" class="feed">
     <div class="feed-head">
       <strong>{{ posts.length }} Beiträge</strong>
-      <span>Alle Kategorien</span>
+      <span>{{ feedCategoryLabel }}</span>
     </div>
 
     <p v-if="posts.length === 0" class="empty">
@@ -60,7 +60,6 @@
             {{ post.comments.length }} Kommentare
           </button>
           <span>{{ normalizedStudyProgram(post.studyProgram) }}</span>
-          <span class="helpful">{{ post.helpfulPercent }}% hilfreich</span>
         </footer>
       </div>
     </article>
@@ -68,9 +67,11 @@
 </template>
 
 <script setup lang="ts">
+import { computed } from 'vue'
 import type { Post } from '../data/posts'
 
 const props = defineProps<{
+  activeCategory: string
   posts: Post[]
   userVotes: Record<number, 'up' | 'down'>
 }>()
@@ -95,9 +96,18 @@ const normalizedStudyProgram = (studyProgram: string) => {
   return studyProgram.replace(/\s+/g, '')
 }
 
+const feedCategoryLabel = computed(() => {
+  return props.activeCategory === 'Alle' ? 'Alle Kategorien' : `Kategorie: ${props.activeCategory}`
+})
+
 const categoryTone = (category: string) => {
-  if (category.toLowerCase().includes('raum') || category.toLowerCase().includes('räume')) return 'rooms'
-  if (category.toLowerCase().includes('campus')) return 'campus'
+  const normalizedCategory = category
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+
+  if (normalizedCategory.includes('vorlesung')) return 'rooms'
+  if (normalizedCategory.includes('praktikum')) return 'campus'
   return 'module'
 }
 </script>
@@ -324,13 +334,6 @@ footer button {
 
 footer button:hover {
   color: var(--red);
-}
-
-.helpful {
-  border-radius: 999px;
-  background: #e6f7f4;
-  color: #08776c;
-  padding: 4px 8px;
 }
 
 @media (max-width: 520px) {
