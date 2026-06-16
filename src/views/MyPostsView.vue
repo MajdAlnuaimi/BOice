@@ -294,20 +294,25 @@ const ownPosts: OwnPost[] = [
   border-radius: 8px;
   background: #fff8e6;
   color: var(--gold);
+  display: grid;
+  place-items: center;
   padding: 6px;
   text-align: center;
 }
 
 .rating-badge strong {
-  display: block;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
   font-size: 15px;
   line-height: 1;
 }
 
 .rating-badge strong::after {
   content: "★";
-  margin-left: 2px;
   font-size: 10px;
+  line-height: 1;
 }
 
 .post-card h3 {
