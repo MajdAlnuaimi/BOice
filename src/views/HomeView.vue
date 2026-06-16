@@ -649,6 +649,16 @@ onUnmounted(() => {
 .rating-card .rail-head span {
   background: #fff8e6;
   color: var(--gold);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+}
+
+.rating-card .rail-head span::after {
+  content: "★";
+  font-size: 10px;
+  line-height: 1;
 }
 
 .rating-bars {
