@@ -1,6 +1,6 @@
 <template>
   <!-- Feste Sidebar wie im Referenzdesign -->
-  <aside class="sidebar">
+  <aside class="sidebar" :class="{ 'without-categories': !isFeedRoute }">
     <RouterLink class="brand" to="/" aria-label="BOice Startseite">
       <img src="/boice-logo.png" alt="BOice" />
     </RouterLink>
@@ -34,11 +34,11 @@
             <path d="M10 19a2 2 0 0 0 4 0" />
           </svg>
         </span>
-        <span class="nav-label">Benachrichtigungen</span>
+        <span class="nav-label">Hinweise</span>
       </RouterLink>
     </nav>
 
-    <section class="side-categories" aria-label="Kategorien">
+    <section v-if="isFeedRoute" class="side-categories" aria-label="Kategorien">
       <div class="side-section-head">
         <span>Kategorien</span>
         <RouterLink :class="{ active: currentCategory === 'Alle' }" :to="{ path: '/beitraege' }">
@@ -47,25 +47,25 @@
       </div>
 
       <RouterLink
-        :class="{ active: currentCategory === 'Übungen' }"
-        :to="{ path: '/beitraege', query: { category: 'Übungen' } }"
-      >
-        <i class="dot module"></i>
-        Übungen
-      </RouterLink>
-      <RouterLink
         :class="{ active: currentCategory === 'Vorlesungen' }"
         :to="{ path: '/beitraege', query: { category: 'Vorlesungen' } }"
       >
+        <i class="dot module"></i>
+        <span class="category-label">Vorlesungen</span>
+      </RouterLink>
+      <RouterLink
+        :class="{ active: currentCategory === 'Übungen' }"
+        :to="{ path: '/beitraege', query: { category: 'Übungen' } }"
+      >
         <i class="dot rooms"></i>
-        Vorlesungen
+        <span class="category-label">Übungen</span>
       </RouterLink>
       <RouterLink
         :class="{ active: currentCategory === 'Praktikum' }"
         :to="{ path: '/beitraege', query: { category: 'Praktikum' } }"
       >
         <i class="dot campus"></i>
-        Praktikum
+        <span class="category-label">Praktikum</span>
       </RouterLink>
     </section>
 
@@ -298,11 +298,19 @@ onUnmounted(() => {
 }
 
 .dot {
+  flex: 0 0 auto;
   width: 11px;
   height: 11px;
   border-radius: 50%;
   display: inline-block;
   box-shadow: 0 0 0 4px rgba(0, 0, 0, 0.04);
+}
+
+.category-label {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .module {
@@ -459,6 +467,10 @@ onUnmounted(() => {
     background: rgba(246, 248, 251, 0.96);
   }
 
+  .sidebar.without-categories {
+    grid-template-areas: "brand account";
+  }
+
   .brand {
     grid-area: brand;
     align-self: center;
@@ -537,7 +549,11 @@ onUnmounted(() => {
   .side-categories {
     grid-area: categories;
     display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-template-columns:
+      minmax(64px, 0.7fr)
+      minmax(132px, 1.45fr)
+      minmax(92px, 1fr)
+      minmax(104px, 1.05fr);
     gap: 6px;
     margin-top: 0;
   }
@@ -557,6 +573,8 @@ onUnmounted(() => {
     border: 1px solid var(--line);
     border-radius: 8px;
     background: white;
+    display: flex;
+    align-items: center;
     justify-content: center;
     gap: 5px;
     padding: 0 8px;
@@ -638,6 +656,11 @@ onUnmounted(() => {
   }
 
   .side-categories {
+    grid-template-columns:
+      minmax(52px, 0.58fr)
+      minmax(106px, 1.4fr)
+      minmax(78px, 0.95fr)
+      minmax(84px, 1.05fr);
     gap: 5px;
   }
 

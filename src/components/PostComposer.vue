@@ -109,12 +109,12 @@ const emit = defineEmits<{
   createPost: [post: NewPost]
 }>()
 
-const categories = ['Übungen', 'Vorlesungen', 'Praktikum']
+const categories = ['Vorlesungen', 'Übungen', 'Praktikum']
 const ratingSteps = [1, 2, 3, 4, 5]
 
 const form = reactive({
   title: '',
-  category: 'Übungen',
+  category: 'Vorlesungen',
   body: '',
   rating: 0,
   isAnonymous: false,
@@ -166,7 +166,7 @@ const submitPost = () => {
   })
 
   form.title = ''
-  form.category = 'Übungen'
+  form.category = 'Vorlesungen'
   form.body = ''
   form.rating = 0
   form.isAnonymous = false

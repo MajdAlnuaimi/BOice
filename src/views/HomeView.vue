@@ -32,7 +32,7 @@
           <input
             v-model="search"
             type="search"
-            placeholder="Suchen nach Übung, Vorlesung, Praktikum..."
+            placeholder="Suchen nach Vorlesung, Übung, Praktikum..."
           />
         </label>
 
@@ -117,8 +117,6 @@
           <h2>Campus Bewertung</h2>
           <span>{{ averageRating }}</span>
         </div>
-
-        <p>{{ averageHelpful }}% hilfreich bewertet</p>
 
         <div class="rating-bars">
           <div v-for="rating in categoryRatings" :key="rating.category">
@@ -223,9 +221,11 @@ const selectedPost = ref<Post | null>(null)
 const search = ref('')
 const activeCategory = ref('Alle')
 const feedMode = ref<FeedMode>('new')
+const categoryOrder = ['Vorlesungen', 'Übungen', 'Praktikum']
 
 const categories = computed(() => {
-  return [...new Set(posts.value.map((post) => post.category))]
+  const existingCategories = new Set(posts.value.map((post) => post.category))
+  return categoryOrder.filter((category) => existingCategories.has(category))
 })
 
 const routeCategory = () => {
@@ -290,11 +290,6 @@ const totalComments = computed(() => {
 const averageRating = computed(() => {
   const value = posts.value.reduce((sum, post) => sum + post.rating, 0) / posts.value.length
   return value.toFixed(1)
-})
-
-const averageHelpful = computed(() => {
-  const value = posts.value.reduce((sum, post) => sum + post.helpfulPercent, 0) / posts.value.length
-  return Math.round(value)
 })
 
 const topTrends = computed(() => {
@@ -588,8 +583,7 @@ onUnmounted(() => {
   font-size: 15px;
 }
 
-.trend-item p,
-.rating-card p {
+.trend-item p {
   color: var(--muted);
   font-size: 12px;
   font-weight: 900;
@@ -654,6 +648,10 @@ onUnmounted(() => {
 @media (max-width: 1180px) {
   .page-layout {
     grid-template-columns: minmax(0, 1fr);
+  }
+
+  .category-tabs {
+    display: none;
   }
 
   .right-rail {

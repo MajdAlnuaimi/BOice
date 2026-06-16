@@ -68,22 +68,10 @@ type OwnPost = {
 
 const ownPosts: OwnPost[] = [
   {
-    id: 1,
-    title: 'Java Übungen brauchen mehr Beispiele',
-    category: 'Übungen',
-    tone: 'module',
-    body: 'Bei den Aufgaben wäre ein kurzer Lösungsansatz hilfreich. Dann kann man besser einschätzen, ob man auf dem richtigen Weg ist.',
-    createdAt: 'heute',
-    visibility: 'Test',
-    votes: 11,
-    comments: 3,
-    rating: '3.8',
-  },
-  {
     id: 2,
     title: 'Vorlesung Datenbanken braucht mehr Wiederholung',
     category: 'Vorlesungen',
-    tone: 'rooms',
+    tone: 'module',
     body: 'Die Inhalte bauen stark aufeinander auf. Eine kurze Wiederholung vor neuen Themen würde das Mitkommen leichter machen.',
     createdAt: 'gestern',
     visibility: 'anonym',
@@ -92,11 +80,23 @@ const ownPosts: OwnPost[] = [
     rating: '4.1',
   },
   {
+    id: 1,
+    title: 'Java Übungen brauchen mehr Beispiele',
+    category: 'Übungen',
+    tone: 'rooms',
+    body: 'Bei den Aufgaben wäre ein kurzer Lösungsansatz hilfreich. Dann kann man besser einschätzen, ob man auf dem richtigen Weg ist.',
+    createdAt: 'heute',
+    visibility: 'Test',
+    votes: 11,
+    comments: 3,
+    rating: '3.8',
+  },
+  {
     id: 3,
-    title: 'Praktikum Webtechnik klarer strukturieren',
+    title: 'Praktikum Software-Engineering klarer strukturieren',
     category: 'Praktikum',
     tone: 'campus',
-    body: 'Die Abgaben funktionieren besser, wenn Anforderungen, Bewertung und Beispielausgabe direkt in einer Checkliste stehen.',
+    body: 'Die Abgaben im Software-Engineering funktionieren besser, wenn Anforderungen, Bewertung und Beispielausgabe direkt in einer Checkliste stehen.',
     createdAt: 'vor 3 Tagen',
     visibility: 'Test',
     votes: 5,
@@ -143,7 +143,7 @@ const ownPosts: OwnPost[] = [
 
 .for-you-card h1 {
   margin: 0;
-  font-size: clamp(38px, 5vw, 54px);
+  font-size: clamp(30px, 4vw, 42px);
   line-height: 1;
 }
 

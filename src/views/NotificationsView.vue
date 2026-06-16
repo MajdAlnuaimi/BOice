@@ -4,12 +4,12 @@
       <section class="for-you-card">
         <div class="for-you-head">
           <div>
-            <h1>Benachrichtigungen</h1>
+            <h1>Hinweise</h1>
           </div>
         </div>
       </section>
 
-      <section class="notification-list" aria-label="Benachrichtigungsliste">
+      <section class="notification-list" aria-label="Hinweisliste">
         <div class="feed-head">
           <strong>Aktuelle Hinweise</strong>
           <span>{{ notifications.length }} Meldungen</span>
@@ -131,7 +131,7 @@ const notifications: StaticNotification[] = [
 
 .for-you-card h1 {
   margin: 0;
-  font-size: clamp(38px, 5vw, 54px);
+  font-size: clamp(30px, 4vw, 42px);
   line-height: 1;
 }
 

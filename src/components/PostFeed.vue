@@ -106,7 +106,8 @@ const categoryTone = (category: string) => {
     .normalize('NFD')
     .replace(/[\u0300-\u036f]/g, '')
 
-  if (normalizedCategory.includes('vorlesung')) return 'rooms'
+  if (normalizedCategory.includes('vorlesung')) return 'module'
+  if (normalizedCategory.includes('ubung')) return 'rooms'
   if (normalizedCategory.includes('praktikum')) return 'campus'
   return 'module'
 }

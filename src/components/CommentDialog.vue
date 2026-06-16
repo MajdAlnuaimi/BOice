@@ -40,7 +40,6 @@
           <footer>
             <span>{{ post.comments.length }} Kommentare</span>
             <span>{{ normalizedStudyProgram(post.studyProgram) }}</span>
-            <span class="helpful">{{ post.helpfulPercent }}% hilfreich</span>
           </footer>
         </div>
       </article>
@@ -62,7 +61,7 @@
 
           <div class="comment-fields">
             <div class="comment-author">
-              <div>
+              <div class="comment-author-name">
                 <span>Kommentieren als</span>
                 <strong>{{ form.isAnonymous ? 'Anonym' : accountName }}</strong>
               </div>
@@ -162,7 +161,8 @@ const categoryTone = (category: string) => {
     .normalize('NFD')
     .replace(/[\u0300-\u036f]/g, '')
 
-  if (normalizedCategory.includes('vorlesung')) return 'rooms'
+  if (normalizedCategory.includes('vorlesung')) return 'module'
+  if (normalizedCategory.includes('ubung')) return 'rooms'
   if (normalizedCategory.includes('praktikum')) return 'campus'
   return 'module'
 }
@@ -308,8 +308,7 @@ header button:hover {
   font-weight: 900;
 }
 
-.category,
-.helpful {
+.category {
   border-radius: 999px;
   display: inline-flex;
   padding: 5px 9px;
@@ -377,11 +376,6 @@ header button:hover {
   color: var(--muted);
   font-size: 12px;
   font-weight: 900;
-}
-
-.helpful {
-  background: #e6f7f4;
-  color: #08776c;
 }
 
 .comments-area {
@@ -496,39 +490,47 @@ header button:hover {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 14px;
+  gap: 16px;
+  font-size: 13px;
+  font-weight: 900;
   padding: 11px 12px;
 }
 
-.comment-author span,
-.comment-author strong {
-  display: block;
+.comment-author-name {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+  white-space: nowrap;
 }
 
-.comment-author > div > span {
+.comment-author-name span {
   color: var(--muted);
-  font-size: 12px;
-  font-weight: 900;
+  font-size: inherit;
+  font-weight: inherit;
+  line-height: 1;
 }
 
-.comment-author strong {
-  margin-top: 2px;
+.comment-author-name strong {
   color: var(--ink);
-  font-size: 15px;
+  font-size: inherit;
+  font-weight: inherit;
+  line-height: 1;
 }
 
-.switch-row {
+.comment-form .switch-row {
   display: inline-flex;
   align-items: center;
   gap: 9px;
   margin: 0;
   color: var(--muted);
-  font-size: 13px;
-  font-weight: 900;
+  font-size: inherit;
+  font-weight: inherit;
+  line-height: 1;
   white-space: nowrap;
 }
 
-.switch-row input {
+.comment-form .switch-row input {
   position: absolute;
   width: 1px;
   height: 1px;
@@ -536,7 +538,7 @@ header button:hover {
   pointer-events: none;
 }
 
-.switch-row span {
+.comment-form .switch-row span {
   width: 34px;
   height: 20px;
   border-radius: 999px;
@@ -544,7 +546,7 @@ header button:hover {
   position: relative;
 }
 
-.switch-row span::after {
+.comment-form .switch-row span::after {
   content: "";
   position: absolute;
   top: 3px;
@@ -556,11 +558,11 @@ header button:hover {
   transition: transform 160ms ease;
 }
 
-.switch-row input:checked + span {
+.comment-form .switch-row input:checked + span {
   background: var(--red);
 }
 
-.switch-row input:checked + span::after {
+.comment-form .switch-row input:checked + span::after {
   transform: translateX(14px);
 }
 
@@ -645,12 +647,17 @@ header button:hover {
   }
 
   .comment-author {
-    align-items: flex-start;
-    flex-direction: column;
+    gap: 8px;
+    font-size: 12px;
+    padding: 10px;
   }
 
-  .switch-row {
-    white-space: normal;
+  .comment-author-name {
+    gap: 8px;
+  }
+
+  .comment-form .switch-row {
+    gap: 7px;
   }
 
   .comment-actions {
