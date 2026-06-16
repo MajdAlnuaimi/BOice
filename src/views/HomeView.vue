@@ -64,6 +64,7 @@
 
       <PostFeed
         :active-category="activeCategory"
+        :is-logged-in="isLoggedIn"
         :posts="visiblePosts"
         :user-votes="userVotes"
         @open-comments="openComments"
@@ -191,8 +192,21 @@ const isLoggedIn = ref(localStorage.getItem(loginStorageKey) === 'true')
 
 // Aktualisiert den Login-Zustand, wenn Anmeldung oder Abmeldung passiert.
 const refreshAuthState = () => {
-  isLoggedIn.value = localStorage.getItem(loginStorageKey) === 'true'
+  const nextIsLoggedIn = localStorage.getItem(loginStorageKey) === 'true'
   currentStudent.value = loadCurrentStudent()
+
+  if (!nextIsLoggedIn) {
+    applyVoteDeltas(userVotes.value, -1)
+    userVotes.value = {}
+    isLoggedIn.value = false
+    return
+  }
+
+  const nextVotes = loadUserVotes()
+  applyVoteDeltas(userVotes.value, -1)
+  applyVoteDeltas(nextVotes, 1)
+  userVotes.value = nextVotes
+  isLoggedIn.value = true
 }
 
 const loadUserVotes = () => {
@@ -207,7 +221,16 @@ const saveUserVotes = (votes: Record<number, VoteDirection>) => {
   localStorage.setItem(userVotesStorageKey, JSON.stringify(votes))
 }
 
-const storedUserVotes = loadUserVotes()
+const voteDelta = (direction: VoteDirection) => (direction === 'up' ? 1 : -1)
+
+const applyVoteDeltas = (votes: Record<number, VoteDirection>, factor: 1 | -1) => {
+  Object.entries(votes).forEach(([postId, direction]) => {
+    const post = posts.value.find((item) => item.id === Number(postId))
+    if (post) post.votes += voteDelta(direction) * factor
+  })
+}
+
+const storedUserVotes: Record<number, VoteDirection> = isLoggedIn.value ? loadUserVotes() : {}
 
 const posts = ref<Post[]>(
   initialPosts.map((post) => ({
@@ -362,12 +385,17 @@ const addComment = (payload: { postId: number; author: string; body: string }) =
 }
 
 const votePost = (payload: { id: number; direction: 'up' | 'down' }) => {
+  if (!isLoggedIn.value) {
+    void router.push('/anmelden')
+    return
+  }
+
   const previousVote = userVotes.value[payload.id]
   const post = posts.value.find((item) => item.id === payload.id)
   if (!post) return
 
   if (previousVote === payload.direction) {
-    post.votes += payload.direction === 'up' ? -1 : 1
+    post.votes -= voteDelta(payload.direction)
     const { [payload.id]: _removedVote, ...remainingVotes } = userVotes.value
     userVotes.value = remainingVotes
     saveUserVotes(userVotes.value)
@@ -375,9 +403,9 @@ const votePost = (payload: { id: number; direction: 'up' | 'down' }) => {
   }
 
   if (!previousVote) {
-    post.votes += payload.direction === 'up' ? 1 : -1
+    post.votes += voteDelta(payload.direction)
   } else {
-    post.votes += payload.direction === 'up' ? 2 : -2
+    post.votes += voteDelta(payload.direction) * 2
   }
 
   userVotes.value = {

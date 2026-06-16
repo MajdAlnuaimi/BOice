@@ -1,7 +1,6 @@
 <template>
   <section class="auth-page">
     <div class="auth-copy">
-      <p class="label">BOice Konto</p>
       <h1>{{ pageTitle }}</h1>
       <p>
         Studierende können sich später anmelden, Beiträge schreiben,
@@ -23,7 +22,7 @@
         <article>
           <span>03</span>
           <strong>Aktivität sehen</strong>
-          <p>Kommentare und Bewertungen können später gemeldet werden.</p>
+          <p>Hinweise informieren über neue Kommentare und Bewertungen.</p>
         </article>
       </div>
     </div>
@@ -312,8 +311,8 @@ const submitForm = () => {
 
 .auth-copy h1 {
   margin: 0 0 16px;
-  font-size: clamp(38px, 6vw, 64px);
-  line-height: 1.05;
+  font-size: clamp(30px, 4.5vw, 44px);
+  line-height: 1.12;
 }
 
 .auth-copy > p {
@@ -590,7 +589,7 @@ select:focus {
 
 @media (max-width: 460px) {
   .auth-copy h1 {
-    font-size: 34px;
+    font-size: 30px;
   }
 
   .form-head {

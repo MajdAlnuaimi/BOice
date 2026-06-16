@@ -6,19 +6,25 @@
       <span>{{ feedCategoryLabel }}</span>
     </div>
 
+    <div v-if="showVoteLoginHint && !props.isLoggedIn" id="vote-login-notice" class="vote-login-notice" role="alert">
+      <strong>Zum Voten bitte anmelden</strong>
+      <RouterLink to="/anmelden">Anmelden</RouterLink>
+    </div>
+
     <p v-if="posts.length === 0" class="empty">
       Keine Beiträge gefunden. Ändere die Suche oder wähle eine andere Kategorie.
     </p>
 
     <article v-for="post in posts" :key="post.id" class="post-card">
       <div class="vote-column">
-        <div class="vote-lamp" :class="props.userVotes[post.id]">
+        <div class="vote-lamp" :class="[voteState(post.id), { locked: !props.isLoggedIn }]">
           <button
             type="button"
-            :aria-pressed="props.userVotes[post.id] === 'up'"
+            :aria-pressed="voteState(post.id) === 'up'"
+            :aria-describedby="showVoteLoginHint && !props.isLoggedIn ? 'vote-login-notice' : undefined"
             aria-label="Beitrag liken"
             class="vote-button up-vote"
-            :class="{ active: props.userVotes[post.id] === 'up' }"
+            :class="{ active: voteState(post.id) === 'up' }"
             :title="voteTitle(post.id, 'up')"
             @click="vote(post.id, 'up')"
           >
@@ -27,10 +33,11 @@
           <strong>{{ post.votes }}</strong>
           <button
             type="button"
-            :aria-pressed="props.userVotes[post.id] === 'down'"
+            :aria-pressed="voteState(post.id) === 'down'"
+            :aria-describedby="showVoteLoginHint && !props.isLoggedIn ? 'vote-login-notice' : undefined"
             aria-label="Beitrag disliken"
             class="vote-button down-vote"
-            :class="{ active: props.userVotes[post.id] === 'down' }"
+            :class="{ active: voteState(post.id) === 'down' }"
             :title="voteTitle(post.id, 'down')"
             @click="vote(post.id, 'down')"
           >
@@ -67,11 +74,13 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, onUnmounted, ref } from 'vue'
+import { RouterLink } from 'vue-router'
 import type { Post } from '../data/posts'
 
 const props = defineProps<{
   activeCategory: string
+  isLoggedIn: boolean
   posts: Post[]
   userVotes: Record<number, 'up' | 'down'>
 }>()
@@ -81,12 +90,30 @@ const emit = defineEmits<{
   votePost: [payload: { id: number; direction: 'up' | 'down' }]
 }>()
 
+const showVoteLoginHint = ref(false)
+let hideVoteLoginHintTimer: number | undefined
+
 const vote = (id: number, direction: 'up' | 'down') => {
+  if (!props.isLoggedIn) {
+    showVoteLoginHint.value = true
+    window.clearTimeout(hideVoteLoginHintTimer)
+    hideVoteLoginHintTimer = window.setTimeout(() => {
+      showVoteLoginHint.value = false
+    }, 5000)
+    return
+  }
+
   emit('votePost', { id, direction })
 }
 
+const voteState = (id: number) => {
+  return props.isLoggedIn ? props.userVotes[id] : undefined
+}
+
 const voteTitle = (id: number, direction: 'up' | 'down') => {
-  const currentVote = props.userVotes[id]
+  if (!props.isLoggedIn) return 'Zum Voten bitte anmelden'
+
+  const currentVote = voteState(id)
   if (!currentVote) return direction === 'up' ? 'Beitrag liken' : 'Beitrag disliken'
   if (currentVote === direction) return 'Stimme entfernen'
   return 'Stimme ändern'
@@ -111,6 +138,10 @@ const categoryTone = (category: string) => {
   if (normalizedCategory.includes('praktikum')) return 'campus'
   return 'module'
 }
+
+onUnmounted(() => {
+  window.clearTimeout(hideVoteLoginHintTimer)
+})
 </script>
 
 <style scoped>
@@ -128,6 +159,36 @@ const categoryTone = (category: string) => {
   color: var(--muted);
   font-size: 13px;
   font-weight: 900;
+}
+
+.vote-login-notice {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 0 0 12px;
+  padding: 12px 14px;
+  border: 2px solid var(--red);
+  border-radius: 8px;
+  background: #fff0f1;
+  color: var(--red-dark);
+  box-shadow: 0 14px 30px rgba(227, 6, 19, 0.16);
+}
+
+.vote-login-notice strong {
+  font-size: 15px;
+  font-weight: 900;
+}
+
+.vote-login-notice a {
+  flex: 0 0 auto;
+  border-radius: 7px;
+  background: var(--red);
+  color: white;
+  padding: 9px 14px;
+  font-size: 13px;
+  font-weight: 900;
+  text-decoration: none;
 }
 
 .empty {
