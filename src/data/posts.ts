@@ -16,6 +16,7 @@ export type Post = {
   semester: number
   body: string
   createdAt: string
+  publishedAt: number
   rating: number
   helpfulPercent: number
   votes: number
@@ -23,6 +24,8 @@ export type Post = {
 }
 
 // Beispieldaten fuer das Frontend, solange noch keine API angeschlossen ist
+const now = Date.now()
+
 export const initialPosts: Post[] = [
   {
     id: 2,
@@ -33,6 +36,7 @@ export const initialPosts: Post[] = [
     semester: 2,
     body: 'Die Inhalte sind interessant, aber die Normalformen werden sehr schnell behandelt. Eine kurze Wiederholung am Anfang wäre gut.',
     createdAt: 'vor 12 Minuten',
+    publishedAt: now - 12 * 60 * 1000,
     rating: 3.2,
     helpfulPercent: 76,
     votes: 3,
@@ -54,6 +58,7 @@ export const initialPosts: Post[] = [
     semester: 3,
     body: 'Die Aufgaben sind sinnvoll, aber oft fehlt ein kurzer Lösungsansatz. Ein Beispiel vor jeder Aufgabe würde vielen helfen.',
     createdAt: 'vor 3 Minuten',
+    publishedAt: now - 3 * 60 * 1000,
     rating: 3.7,
     helpfulPercent: 82,
     votes: 5,
@@ -81,6 +86,7 @@ export const initialPosts: Post[] = [
     semester: 5,
     body: 'Die Aufgaben im Software-Engineering-Praktikum sind gut, aber die Bewertungskriterien sollten vor der Abgabe genauer beschrieben werden.',
     createdAt: 'vor 25 Minuten',
+    publishedAt: now - 25 * 60 * 1000,
     rating: 4.5,
     helpfulPercent: 91,
     votes: 8,

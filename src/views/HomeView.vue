@@ -272,6 +272,10 @@ watch(
   { immediate: true },
 )
 
+const sortByPublishedAt = (firstPost: Post, secondPost: Post) => {
+  return secondPost.publishedAt - firstPost.publishedAt || secondPost.id - firstPost.id
+}
+
 const visiblePosts = computed(() => {
   const term = search.value.trim().toLowerCase()
 
@@ -295,11 +299,11 @@ const visiblePosts = computed(() => {
 
   if (feedMode.value === 'top') {
     return [...filteredPosts].sort((firstPost, secondPost) => {
-      return secondPost.votes - firstPost.votes || secondPost.id - firstPost.id
+      return secondPost.votes - firstPost.votes || sortByPublishedAt(firstPost, secondPost)
     })
   }
 
-  return filteredPosts
+  return [...filteredPosts].sort(sortByPublishedAt)
 })
 
 const totalVotes = computed(() => {
@@ -345,8 +349,9 @@ const createPost = (payload: {
   }
 
   const student = currentStudent.value
+  const publishedAt = Date.now()
   const newPost: Post = {
-    id: Date.now(),
+    id: publishedAt,
     title: payload.title,
     category: payload.category,
     author: payload.isAnonymous ? 'Anonym' : student.name,
@@ -354,6 +359,7 @@ const createPost = (payload: {
     semester: student.semester,
     body: payload.body,
     createdAt: 'gerade eben',
+    publishedAt,
     rating: payload.rating,
     helpfulPercent: 80,
     votes: 0,

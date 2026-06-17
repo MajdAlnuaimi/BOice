@@ -67,6 +67,7 @@
             {{ post.comments.length }} Kommentare
           </button>
           <span>{{ normalizedStudyProgram(post.studyProgram) }}</span>
+          <span>{{ post.semester }}. Semester</span>
         </footer>
       </div>
     </article>
