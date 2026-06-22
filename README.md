@@ -24,7 +24,7 @@ Es liegt bewusst nicht im echten Projektordner `D:\BOice`.
 ## Starten
 
 ```powershell
-cd D:\Test\BOice-Termin2-Test
+cd D:\Test\BOice
 npm install
 npm run dev
 ```
