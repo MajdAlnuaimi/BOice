@@ -139,21 +139,13 @@
   />
 </template>
 
-<script setup lang="ts">
+<script setup>
 import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import PostComposer from '../components/PostComposer.vue'
 import PostFeed from '../components/PostFeed.vue'
 import CommentDialog from '../components/CommentDialog.vue'
-import { initialPosts, type Post } from '../data/posts'
-
-type VoteDirection = 'up' | 'down'
-type FeedMode = 'new' | 'top'
-type StudentAccount = {
-  name: string
-  studyProgram: string
-  semester: number
-}
+import { initialPosts } from '../data/posts'
 
 const route = useRoute()
 const router = useRouter()
@@ -162,20 +154,20 @@ const accountStorageKey = 'boice:account'
 const loginStorageKey = 'boice:isLoggedIn'
 const userVotesStorageKey = `boice:votes:${accountId}`
 
-const fallbackStudent: StudentAccount = {
+const fallbackStudent = {
   name: 'Test',
   studyProgram: 'Wirtschaftsinformatik',
   semester: 3,
 }
 
-const normalizeAccountName = (name?: string) => {
+const normalizeAccountName = (name) => {
   const oldFallbackName = ['Studierende', 'Person'].join(' ')
   return name && name !== oldFallbackName ? name : fallbackStudent.name
 }
 
 const loadCurrentStudent = () => {
   try {
-    const storedAccount = JSON.parse(localStorage.getItem(accountStorageKey) ?? 'null') as Partial<StudentAccount> | null
+    const storedAccount = JSON.parse(localStorage.getItem(accountStorageKey) ?? 'null')
 
     return {
       name: normalizeAccountName(storedAccount?.name),
@@ -187,7 +179,7 @@ const loadCurrentStudent = () => {
   }
 }
 
-const currentStudent = ref<StudentAccount>(loadCurrentStudent())
+const currentStudent = ref(loadCurrentStudent())
 const isLoggedIn = ref(localStorage.getItem(loginStorageKey) === 'true')
 
 // Aktualisiert den Login-Zustand, wenn Anmeldung oder Abmeldung passiert.
@@ -211,39 +203,39 @@ const refreshAuthState = () => {
 
 const loadUserVotes = () => {
   try {
-    return JSON.parse(localStorage.getItem(userVotesStorageKey) ?? '{}') as Record<number, VoteDirection>
+    return JSON.parse(localStorage.getItem(userVotesStorageKey) ?? '{}')
   } catch {
     return {}
   }
 }
 
-const saveUserVotes = (votes: Record<number, VoteDirection>) => {
+const saveUserVotes = (votes) => {
   localStorage.setItem(userVotesStorageKey, JSON.stringify(votes))
 }
 
-const voteDelta = (direction: VoteDirection) => (direction === 'up' ? 1 : -1)
+const voteDelta = (direction) => (direction === 'up' ? 1 : -1)
 
-const applyVoteDeltas = (votes: Record<number, VoteDirection>, factor: 1 | -1) => {
+const applyVoteDeltas = (votes, factor) => {
   Object.entries(votes).forEach(([postId, direction]) => {
     const post = posts.value.find((item) => item.id === Number(postId))
     if (post) post.votes += voteDelta(direction) * factor
   })
 }
 
-const storedUserVotes: Record<number, VoteDirection> = isLoggedIn.value ? loadUserVotes() : {}
+const storedUserVotes = isLoggedIn.value ? loadUserVotes() : {}
 
-const posts = ref<Post[]>(
+const posts = ref(
   initialPosts.map((post) => ({
     ...post,
     votes: post.votes + (storedUserVotes[post.id] === 'up' ? 1 : storedUserVotes[post.id] === 'down' ? -1 : 0),
   })),
 )
 
-const userVotes = ref<Record<number, VoteDirection>>(storedUserVotes)
-const selectedPost = ref<Post | null>(null)
+const userVotes = ref(storedUserVotes)
+const selectedPost = ref(null)
 const search = ref('')
 const activeCategory = ref('Alle')
-const feedMode = ref<FeedMode>('new')
+const feedMode = ref('new')
 const categoryOrder = ['Vorlesungen', 'Übungen', 'Praktikum']
 
 const categories = computed(() => {
@@ -256,7 +248,7 @@ const routeCategory = () => {
   return typeof category === 'string' && categories.value.includes(category) ? category : 'Alle'
 }
 
-const setCategory = (category: string) => {
+const setCategory = (category) => {
   activeCategory.value = category
   void router.push({
     path: '/beitraege',
@@ -332,20 +324,14 @@ const categoryRatings = computed(() => {
   })
 })
 
-const createPost = (payload: {
-  title: string
-  category: string
-  body: string
-  rating: number
-  isAnonymous: boolean
-}) => {
+const createPost = (payload) => {
   if (!isLoggedIn.value) {
     void router.push('/anmelden')
     return
   }
 
   const student = currentStudent.value
-  const newPost: Post = {
+  const newPost = {
     id: Date.now(),
     title: payload.title,
     category: payload.category,
@@ -363,11 +349,11 @@ const createPost = (payload: {
   posts.value.unshift(newPost)
 }
 
-const openComments = (post: Post) => {
+const openComments = (post) => {
   selectedPost.value = post
 }
 
-const addComment = (payload: { postId: number; author: string; body: string }) => {
+const addComment = (payload) => {
   if (!isLoggedIn.value) {
     void router.push('/anmelden')
     return
@@ -384,7 +370,7 @@ const addComment = (payload: { postId: number; author: string; body: string }) =
   })
 }
 
-const votePost = (payload: { id: number; direction: 'up' | 'down' }) => {
+const votePost = (payload) => {
   if (!isLoggedIn.value) {
     void router.push('/anmelden')
     return

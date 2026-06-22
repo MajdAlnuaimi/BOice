@@ -89,13 +89,9 @@
   </aside>
 </template>
 
-<script setup lang="ts">
+<script setup>
 import { computed, onMounted, onUnmounted, ref } from 'vue'
 import { RouterLink, useRoute } from 'vue-router'
-
-type Account = {
-  name?: string
-}
 
 const accountStorageKey = 'boice:account'
 const loginStorageKey = 'boice:isLoggedIn'
@@ -105,7 +101,7 @@ const isLoggedIn = ref(false)
 const fallbackAccountName = 'Test'
 const accountName = ref(fallbackAccountName)
 
-const normalizeAccountName = (name?: string) => {
+const normalizeAccountName = (name) => {
   const oldFallbackName = ['Studierende', 'Person'].join(' ')
   return name && name !== oldFallbackName ? name : fallbackAccountName
 }
@@ -114,7 +110,7 @@ const refreshAuthState = () => {
   isLoggedIn.value = localStorage.getItem(loginStorageKey) === 'true'
 
   try {
-    const storedAccount = JSON.parse(localStorage.getItem(accountStorageKey) ?? 'null') as Account | null
+    const storedAccount = JSON.parse(localStorage.getItem(accountStorageKey) ?? 'null')
     accountName.value = normalizeAccountName(storedAccount?.name)
   } catch {
     accountName.value = fallbackAccountName

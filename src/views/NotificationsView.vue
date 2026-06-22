@@ -45,21 +45,8 @@
   </div>
 </template>
 
-<script setup lang="ts">
-type NotificationTone = 'upvote' | 'downvote' | 'comment'
-
-type StaticNotification = {
-  id: number
-  type: string
-  title: string
-  body: string
-  postTitle: string
-  time: string
-  icon: string
-  tone: NotificationTone
-}
-
-const notifications: StaticNotification[] = [
+<script setup>
+const notifications = [
   {
     id: 1,
     type: 'Positive Bewertung',

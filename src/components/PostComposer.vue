@@ -88,26 +88,22 @@
   </form>
 </template>
 
-<script setup lang="ts">
+<script setup>
 import { computed, reactive, ref } from 'vue'
 import { RouterLink } from 'vue-router'
 
-type NewPost = {
-  title: string
-  category: string
-  body: string
-  rating: number
-  isAnonymous: boolean
-}
+const props = defineProps({
+  accountName: {
+    type: String,
+    required: true,
+  },
+  isLoggedIn: {
+    type: Boolean,
+    required: true,
+  },
+})
 
-const props = defineProps<{
-  accountName: string
-  isLoggedIn: boolean
-}>()
-
-const emit = defineEmits<{
-  createPost: [post: NewPost]
-}>()
+const emit = defineEmits(['createPost'])
 
 const categories = ['Vorlesungen', 'Übungen', 'Praktikum']
 const ratingSteps = [1, 2, 3, 4, 5]

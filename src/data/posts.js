@@ -1,29 +1,5 @@
-// Typen fuer die Beitragsdaten im Frontend
-export type Comment = {
-  id: number
-  author: string
-  body: string
-  createdAt: string
-}
-
-// Ein Beitrag enthaelt Text, Kategorie, Stimmen und Kommentare
-export type Post = {
-  id: number
-  title: string
-  category: string
-  author: string
-  studyProgram: string
-  semester: number
-  body: string
-  createdAt: string
-  rating: number
-  helpfulPercent: number
-  votes: number
-  comments: Comment[]
-}
-
 // Beispieldaten fuer das Frontend, solange noch keine API angeschlossen ist
-export const initialPosts: Post[] = [
+export const initialPosts = [
   {
     id: 2,
     title: 'Datenbanken-Vorlesung ist zu schnell',

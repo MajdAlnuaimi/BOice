@@ -73,27 +73,35 @@
   </section>
 </template>
 
-<script setup lang="ts">
+<script setup>
 import { computed, onUnmounted, ref } from 'vue'
 import { RouterLink } from 'vue-router'
-import type { Post } from '../data/posts'
 
-const props = defineProps<{
-  activeCategory: string
-  isLoggedIn: boolean
-  posts: Post[]
-  userVotes: Record<number, 'up' | 'down'>
-}>()
+const props = defineProps({
+  activeCategory: {
+    type: String,
+    required: true,
+  },
+  isLoggedIn: {
+    type: Boolean,
+    required: true,
+  },
+  posts: {
+    type: Array,
+    required: true,
+  },
+  userVotes: {
+    type: Object,
+    required: true,
+  },
+})
 
-const emit = defineEmits<{
-  openComments: [post: Post]
-  votePost: [payload: { id: number; direction: 'up' | 'down' }]
-}>()
+const emit = defineEmits(['openComments', 'votePost'])
 
 const showVoteLoginHint = ref(false)
-let hideVoteLoginHintTimer: number | undefined
+let hideVoteLoginHintTimer
 
-const vote = (id: number, direction: 'up' | 'down') => {
+const vote = (id, direction) => {
   if (!props.isLoggedIn) {
     showVoteLoginHint.value = true
     window.clearTimeout(hideVoteLoginHintTimer)
@@ -106,11 +114,11 @@ const vote = (id: number, direction: 'up' | 'down') => {
   emit('votePost', { id, direction })
 }
 
-const voteState = (id: number) => {
+const voteState = (id) => {
   return props.isLoggedIn ? props.userVotes[id] : undefined
 }
 
-const voteTitle = (id: number, direction: 'up' | 'down') => {
+const voteTitle = (id, direction) => {
   if (!props.isLoggedIn) return 'Zum Voten bitte anmelden'
 
   const currentVote = voteState(id)
@@ -119,7 +127,7 @@ const voteTitle = (id: number, direction: 'up' | 'down') => {
   return 'Stimme ändern'
 }
 
-const normalizedStudyProgram = (studyProgram: string) => {
+const normalizedStudyProgram = (studyProgram) => {
   return studyProgram.replace(/\s+/g, '')
 }
 
@@ -127,7 +135,7 @@ const feedCategoryLabel = computed(() => {
   return props.activeCategory === 'Alle' ? 'Alle Kategorien' : `Kategorie: ${props.activeCategory}`
 })
 
-const categoryTone = (category: string) => {
+const categoryTone = (category) => {
   const normalizedCategory = category
     .toLowerCase()
     .normalize('NFD')

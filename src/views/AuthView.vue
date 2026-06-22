@@ -129,23 +129,18 @@
   </section>
 </template>
 
-<script setup lang="ts">
+<script setup>
 import { computed, reactive, ref, watch } from 'vue'
 import { RouterLink, useRouter } from 'vue-router'
 
-type AuthMode = 'login' | 'register'
-type Account = {
-  name: string
-  studyProgram: string
-  semester: number
-  email: string
-  password: string
-}
-
 // Die Route entscheidet, ob das Formular Anmeldung oder Registrierung zeigt.
-const props = defineProps<{
-  mode: AuthMode
-}>()
+const props = defineProps({
+  mode: {
+    type: String,
+    required: true,
+    validator: (value) => ['login', 'register'].includes(value),
+  },
+})
 
 const router = useRouter()
 
@@ -170,7 +165,7 @@ const studyPrograms = [
 
 const accountStorageKey = 'boice:account'
 const loginStorageKey = 'boice:isLoggedIn'
-const fallbackAccount: Account = {
+const fallbackAccount = {
   name: 'Test',
   studyProgram: 'Wirtschaftsinformatik',
   semester: 3,
@@ -178,7 +173,7 @@ const fallbackAccount: Account = {
   password: 'boice1234',
 }
 const showPassword = ref(false)
-const errors = ref<string[]>([])
+const errors = ref([])
 const successMessage = ref('')
 
 const isRegisterMode = computed(() => props.mode === 'register')
@@ -198,25 +193,25 @@ watch(
   },
 )
 
-const hasValidEmail = (email: string) => {
+const hasValidEmail = (email) => {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
 }
 
 // Prüft die Eingaben und zeigt bewusst nur eine Frontend-Erfolgsmeldung.
 const loadStoredAccount = () => {
   try {
-    return JSON.parse(localStorage.getItem(accountStorageKey) ?? 'null') as Partial<Account> | null
+    return JSON.parse(localStorage.getItem(accountStorageKey) ?? 'null')
   } catch {
     return null
   }
 }
 
-const normalizeAccountName = (name?: string) => {
+const normalizeAccountName = (name) => {
   const oldFallbackName = ['Studierende', 'Person'].join(' ')
   return name && name !== oldFallbackName ? name : fallbackAccount.name
 }
 
-const getLoginAccount = (): Account => {
+const getLoginAccount = () => {
   const storedAccount = loadStoredAccount()
 
   return {
@@ -229,11 +224,11 @@ const getLoginAccount = (): Account => {
 }
 
 // Speichert den Account, damit Feed und Kommentare den Namen uebernehmen.
-const saveAccount = (account: Account) => {
+const saveAccount = (account) => {
   localStorage.setItem(accountStorageKey, JSON.stringify(account))
 }
 
-const setLoggedIn = (account: Account) => {
+const setLoggedIn = (account) => {
   saveAccount(account)
   localStorage.setItem(loginStorageKey, 'true')
   window.dispatchEvent(new Event('boice-auth-changed'))

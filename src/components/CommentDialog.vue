@@ -102,23 +102,28 @@
   </div>
 </template>
 
-<script setup lang="ts">
+<script setup>
 import { reactive, ref } from 'vue'
 import { RouterLink } from 'vue-router'
-import type { Post } from '../data/posts'
 
 // Das Popup bekommt den ausgewaehlten Beitrag von App.vue
-const props = defineProps<{
-  accountName: string
-  isLoggedIn: boolean
-  post: Post | null
-}>()
+const props = defineProps({
+  accountName: {
+    type: String,
+    required: true,
+  },
+  isLoggedIn: {
+    type: Boolean,
+    required: true,
+  },
+  post: {
+    type: Object,
+    default: null,
+  },
+})
 
 // Schliessen wird an App.vue gemeldet
-const emit = defineEmits<{
-  addComment: [payload: { postId: number; author: string; body: string }]
-  close: []
-}>()
+const emit = defineEmits(['addComment', 'close'])
 
 const form = reactive({
   isAnonymous: false,
@@ -151,11 +156,11 @@ const submitComment = () => {
   form.body = ''
 }
 
-const normalizedStudyProgram = (studyProgram: string) => {
+const normalizedStudyProgram = (studyProgram) => {
   return studyProgram.replace(/\s+/g, '')
 }
 
-const categoryTone = (category: string) => {
+const categoryTone = (category) => {
   const normalizedCategory = category
     .toLowerCase()
     .normalize('NFD')

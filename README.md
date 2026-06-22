@@ -5,7 +5,7 @@ Es liegt bewusst nicht im echten Projektordner `D:\BOice`.
 
 ## Inhalt
 
-- Vue 3 mit TypeScript
+- Vue 3 mit JavaScript
 - Campus-Feed mit Suche, Kategorien und Sortierung
 - Formular zum Erstellen von Beitraegen
 - Feed mit statischen Beispiel-Beitraegen

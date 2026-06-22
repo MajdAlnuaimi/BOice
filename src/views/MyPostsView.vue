@@ -52,21 +52,8 @@
   </div>
 </template>
 
-<script setup lang="ts">
-type OwnPost = {
-  id: number
-  title: string
-  category: string
-  tone: 'module' | 'rooms' | 'campus'
-  body: string
-  createdAt: string
-  visibility: string
-  votes: number
-  comments: number
-  rating: string
-}
-
-const ownPosts: OwnPost[] = [
+<script setup>
+const ownPosts = [
   {
     id: 2,
     title: 'Vorlesung Datenbanken braucht mehr Wiederholung',
