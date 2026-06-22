@@ -1,4 +1,4 @@
-# BOice Termin 2 Testprojekt
+# BOice 
 
 Dieses Projekt ist eine getrennte Testversion fuer den Frontend-MVP bis Termin 2.
 Es liegt bewusst nicht im echten Projektordner `D:\BOice`.
