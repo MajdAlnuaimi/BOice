@@ -40,6 +40,7 @@
           <footer>
             <span>{{ post.comments.length }} Kommentare</span>
             <span>{{ normalizedStudyProgram(post.studyProgram) }}</span>
+            <span>{{ post.semester }}. Semester</span>
           </footer>
         </div>
       </article>
